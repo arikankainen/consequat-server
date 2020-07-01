@@ -1,0 +1,39 @@
+{
+  "name": "consequat-server",
+  "version": "1.0.0",
+  "description": "\"# consequat-server\"",
+  "main": "src/index.ts",
+   "scripts": {
+    "start": "ts-node src/index.ts",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "ts-node-dev src/index.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/arikankainen/consequat-server.git"
+  },
+  "author": "Ari Kankainen",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/arikankainen/consequat-server/issues"
+  },
+  "homepage": "https://github.com/arikankainen/consequat-server#readme",
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^3.5.0",
+    "@typescript-eslint/parser": "^3.5.0",
+    "eslint": "^7.3.1",
+    "ts-node-dev": "^1.0.0-pre.49"
+  },
+  "dependencies": {
+    "@types/jsonwebtoken": "^8.5.0",
+    "@types/mongoose-unique-validator": "^1.0.4",
+    "apollo-server": "^2.15.1",
+    "dotenv": "^8.2.0",
+    "graphql": "^15.2.0",
+    "jsonwebtoken": "^8.5.1",
+    "mongoose": "^5.9.20",
+    "mongoose-unique-validator": "^2.0.3",
+    "ts-node": "^8.10.2",
+    "typescript": "^3.9.5"
+  }
+}
