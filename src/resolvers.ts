@@ -1,12 +1,9 @@
-interface Resolvers {
-  username: string;
-  realname: string;
-}
+import UserModel, { User } from './models/user';
 
 export const resolvers = {
   Query: {
-    testQuery: (): Resolvers => {
-      return { username: 'testUsername', realname: 'testRealname' };
+    listUsers: async (): Promise<User[]> => {
+      return await UserModel.find({});
     }
   }
 };

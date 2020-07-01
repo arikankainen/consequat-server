@@ -1,11 +1,13 @@
 import { gql } from 'apollo-server';
 
 export const typeDefs = gql`
-  type Test {
+  type User {
     username: String!
-    realname: String!
+    email: String!
+    fullname: String!
+    id: ID!
   }
   type Query {
-    testQuery: Test!
+    listUsers: [User!]
   }
 `;
