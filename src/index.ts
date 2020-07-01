@@ -20,7 +20,9 @@ const resolvers = {
 
 const server = new ApolloServer({
   typeDefs,
-  resolvers
+  resolvers,
+  introspection: true,  // to temporarily enable graphql-playground in production mode
+  playground: true,     // to temporarily enable graphql-playground in production mode
 });
 
 void server
