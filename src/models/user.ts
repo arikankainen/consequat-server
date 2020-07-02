@@ -3,8 +3,10 @@ import uniqueValidator from 'mongoose-unique-validator';
 
 export interface User extends mongoose.Document {
   username: string;
+  password: string;
   email: string;
   fullname: string;
+  id: string;
 }
 
 mongoose.set('useFindAndModify', true);
@@ -17,6 +19,7 @@ const userSchema: mongoose.Schema = new mongoose.Schema({
     required: true,
     minlength: [3, 'username must be at least 3 characters']
   },
+  password: String,
   email: String,
   fullname: String
 });

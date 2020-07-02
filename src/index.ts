@@ -22,7 +22,7 @@ if (MONGODB_URI) {
       if (isError(error)) Logger.log(error.message);
     });
 } else {
-  Logger.error('MongoDB not specified');
+  Logger.error('MONGODB_URI not specified');
 }
 
 const server = new ApolloServer({
