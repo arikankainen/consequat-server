@@ -1,10 +1,11 @@
 import UserModel, { User } from './models/user';
-import { UserInputError } from 'apollo-server';
+import { UserInputError, AuthenticationError } from 'apollo-server';
 import { isError } from './utils/typeguards';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { JWT_PRIVATE_KEY } from './utils/config';
 import Logger from './utils/logger';
+import { UserInContext } from './utils/types';
 
 export const resolvers = {
   Query: {
@@ -33,15 +34,19 @@ export const resolvers = {
       return user;
     },
 
-    deleteUser: async (_root: undefined, args: { id: string }): Promise<string> => {
-      try {
-        await UserModel.findByIdAndRemove(args.id);
+    deleteUser: async (_root: undefined, args: { id: string }, context: UserInContext): Promise<string> => {
+      if (context.currentUser.id == args.id)
+      {
+        try {
+          await UserModel.findByIdAndRemove(args.id);
+        }
+        catch (error) {
+          const message = isError(error) ? error.message : '';
+          throw new UserInputError(message, { invalidArgs: args });
+        }
+        return args.id;
       }
-      catch (error) {
-        const message = isError(error) ? error.message : '';
-        throw new UserInputError(message, { invalidArgs: args });
-      }
-      return args.id;
+      throw new AuthenticationError('Invalid authentication');
     },
 
     login: async (_root: undefined, args: { username: string, password: string }): Promise<{ token: string }> => {
@@ -49,7 +54,7 @@ export const resolvers = {
       const passwordCorrect = user === null ? false : await bcrypt.compare(args.password, user.password);
       
       if (!(user && passwordCorrect)) {
-        return { token: '' };
+        throw new UserInputError('wrong credentials');
       }
 
       const userForToken = {
@@ -58,8 +63,7 @@ export const resolvers = {
       };
 
       if (JWT_PRIVATE_KEY) {
-        const token = jwt.sign(userForToken, JWT_PRIVATE_KEY);
-        return { token: token };
+        return { token: jwt.sign(userForToken, JWT_PRIVATE_KEY) };
       }
       else {
         Logger.log('JWT_PRIVATE_KEY not specified');
