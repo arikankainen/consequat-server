@@ -10,4 +10,14 @@ export const typeDefs = gql`
   type Query {
     listUsers: [User!]
   }
+  type Mutation {
+    createUser(
+      username: String!
+      email: String!
+      fullname: String!
+    ): User
+    deleteUser(
+      id: ID!
+    ): ID
+  }
 `;
