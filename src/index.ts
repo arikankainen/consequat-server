@@ -6,8 +6,9 @@ import Logger from './utils/logger';
 import { typeDefs } from './typeDefs';
 import { resolvers } from './resolvers';
 import jwt from 'jsonwebtoken';
-import UserModel from './models/user';
+import UserModel, { User } from './models/user';
 import { UserInToken } from './utils/types';
+import { IncomingMessage } from 'http';
 
 mongoose.set('useFindAndModify', false);
 mongoose.set('useCreateIndex', true);
@@ -28,23 +29,38 @@ if (MONGODB_URI) {
   Logger.error('MONGODB_URI not specified');
 }
 
+const context = async ({ req }: {req: IncomingMessage}): Promise<{ currentUser: User|null }> => {
+  const auth = req ? req.headers.authorization : null;
+  let currentUser = null;
+
+  if (auth && auth.toLowerCase().startsWith('bearer ') && JWT_PRIVATE_KEY) {
+    const decodedToken = (jwt.verify(auth.substring(7), JWT_PRIVATE_KEY) as UserInToken);
+    currentUser = await UserModel.findById(decodedToken.id);
+  }
+
+  return { currentUser };
+};
+
 const server = new ApolloServer({
   typeDefs,
   resolvers,
   introspection: true,  // to temporarily enable graphql-playground in production mode
   playground: true,     // to temporarily enable graphql-playground in production mode
-  context: async ({ req }) => {
-    const auth = req ? req.headers.authorization : null;
-    if (auth && auth.toLowerCase().startsWith('bearer ') && JWT_PRIVATE_KEY) {
-      const decodedToken = (jwt.verify(auth.substring(7), JWT_PRIVATE_KEY) as UserInToken);
-      const currentUser = await UserModel.findById(decodedToken.id);
-      return { currentUser };
-    }
-  }
+  context
 });
 
-void server
-  .listen({ port: process.env.PORT || 4000 })
-  .then(({ url }) => {
-    Logger.log(`Server ready at ${url}`);
-  });
+if (process.env.NODE_ENV !== 'test') {
+  void server
+    .listen({ port: process.env.PORT || 4000 })
+    .then(({ url }) => {
+      Logger.log(`Server ready at ${url}`);
+    });
+}
+
+export {
+  typeDefs,
+  resolvers,
+  context,
+  ApolloServer,
+  server
+};
