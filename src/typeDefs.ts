@@ -6,6 +6,7 @@ export const typeDefs = gql`
     password: String!
     email: String!
     fullname: String!
+    isAdmin: Boolean!
     id: ID!
   }
 

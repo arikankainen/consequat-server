@@ -5,9 +5,10 @@ export interface UserInToken {
 
 export interface UserInContext {
   currentUser: {
-    username: string;
+    username: string
     password: string;
     email: string;
+    isAdmin: boolean;
     id: string;
   }
 }

@@ -1,11 +1,12 @@
-import UserModel, { User } from './models/user';
 import { UserInputError, AuthenticationError } from 'apollo-server';
-import { isError } from './utils/typeguards';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+
 import { JWT_PRIVATE_KEY } from './utils/config';
-import Logger from './utils/logger';
+import UserModel, { User } from './models/user';
 import { UserInContext } from './utils/types';
+import { isError } from './utils/typeguards';
+import Logger from './utils/logger';
 
 export const resolvers = {
   Query: {
@@ -14,7 +15,7 @@ export const resolvers = {
     }
   },
   Mutation: {
-    createUser: async (_root: undefined, args: User): Promise<User|null> => {
+    createUser: async (_root: undefined, args: User): Promise<User> => {
       const saltRounds = 10;
       const passwordHash = await bcrypt.hash(args.password, saltRounds);
       
@@ -22,8 +23,10 @@ export const resolvers = {
         username: args.username,
         password: passwordHash,
         email: args.email,
-        fullname: args.fullname
+        fullname: args.fullname,
+        isAdmin: false
       });
+
       try {
         await user.save();
       }
@@ -31,12 +34,12 @@ export const resolvers = {
         const message = isError(error) ? error.message : '';
         throw new UserInputError(message, { invalidArgs: args });
       }
+
       return user;
     },
 
-    deleteUser: async (_root: undefined, args: { id: string }, context: UserInContext): Promise<string> => {
-      if (context.currentUser.id == args.id)
-      {
+    deleteUser: async (_root: undefined, args: { id: string }, context: UserInContext): Promise<{ id: string }> => {
+      if (context.currentUser.isAdmin || context.currentUser.id == args.id) {
         try {
           await UserModel.findByIdAndRemove(args.id);
         }
@@ -44,9 +47,11 @@ export const resolvers = {
           const message = isError(error) ? error.message : '';
           throw new UserInputError(message, { invalidArgs: args });
         }
-        return args.id;
+
+        return { id: args.id };
       }
-      throw new AuthenticationError('Invalid authentication');
+
+      throw new AuthenticationError('Not authenticated');
     },
 
     login: async (_root: undefined, args: { username: string, password: string }): Promise<{ token: string }> => {
@@ -54,7 +59,7 @@ export const resolvers = {
       const passwordCorrect = user === null ? false : await bcrypt.compare(args.password, user.password);
       
       if (!(user && passwordCorrect)) {
-        throw new UserInputError('wrong credentials');
+        throw new UserInputError('Wrong credentials');
       }
 
       const userForToken = {

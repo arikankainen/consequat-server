@@ -6,6 +6,7 @@ export interface User extends mongoose.Document {
   password: string;
   email: string;
   fullname: string;
+  isAdmin: boolean;
   id: string;
 }
 
@@ -21,7 +22,8 @@ const userSchema: mongoose.Schema = new mongoose.Schema({
   },
   password: String,
   email: String,
-  fullname: String
+  fullname: String,
+  isAdmin: Boolean
 });
 
 userSchema.plugin(uniqueValidator);
