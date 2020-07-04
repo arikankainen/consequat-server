@@ -3,6 +3,17 @@ import gql from 'graphql-tag';
 import { server, mongoose } from '..';
 import UserModel from '../models/user';
 
+const LOGIN = gql`
+  mutation login($username: String!, $password: String!) {
+    login(
+      username: $username,
+      password: $password
+    ) {
+      token
+    }
+  }
+`;
+
 const CREATE_USER = gql`
   mutation createUser($username: String!, $password: String!, $email: String!, $fullname: String!) {
     createUser(
@@ -26,6 +37,17 @@ const LIST_USERS = gql`
       email,
       fullname,
       isAdmin
+    }
+  }
+`;
+
+const GET_USER = gql`
+  query getUser($username: String!) {
+    getUser(
+      username: $username
+    ) {
+      id,
+      fullname
     }
   }
 `;
@@ -56,10 +78,22 @@ describe('Mutations', () => {
 
     expect(res.data).toEqual(createdUserData);
   });
+
+  it('logged user receives token', async () => {
+    const { mutate } = createTestClient(server);
+
+    const res = await mutate({ mutation: LOGIN, variables: {
+      username: 'testUser',
+      password: '12345'
+    }});
+
+    const loginData = res.data && res.data.login ? res.data.login as { token: string } : { token: '' };
+    expect(loginData.token).toHaveLength(177);
+  });
 });
 
 describe('Queries', () => {
-  it('listUsers lists added user', async () => {
+  it('lists added user', async () => {
     const { query } = createTestClient(server);
     const res = await query({ query: LIST_USERS });
     
@@ -75,6 +109,15 @@ describe('Queries', () => {
     };
     
     expect(res.data).toEqual(queriedUserData);
+  });
+
+  it('finds user by username', async () => {
+    const { query } = createTestClient(server);
+    const res = await query({ query: GET_USER, variables: { username: 'testUser' } });
+
+    const userData = res.data && res.data.getUser ? res.data.getUser as { id: string, fullname: string } : { id: '', fullname: '' };
+    expect(userData.id).toHaveLength(24);
+    expect(userData.fullname).toBe('Test User');
   });
 });
 

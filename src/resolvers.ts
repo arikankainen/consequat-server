@@ -12,6 +12,10 @@ export const resolvers = {
   Query: {
     listUsers: async (): Promise<User[]> => {
       return await UserModel.find({});
+    },
+    
+    getUser: async (_root: undefined, args: { username: string }): Promise<User|null> => {
+      return await UserModel.findOne({ username: args.username });
     }
   },
   Mutation: {
