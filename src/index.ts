@@ -62,5 +62,6 @@ export {
   resolvers,
   context,
   ApolloServer,
-  server
+  server,
+  mongoose
 };
