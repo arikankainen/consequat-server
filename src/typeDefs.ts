@@ -28,8 +28,8 @@ export const typeDefs = gql`
     ): User
 
     deleteUser(
-      id: ID!
-    ): ID
+      username: String!
+    ): User
 
     login(
       username: String!

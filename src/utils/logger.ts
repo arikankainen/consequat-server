@@ -1,5 +1,5 @@
 const log = (...params: Array<string | undefined>): void => {
-  console.log(...params);
+  if (process.env.NODE_ENV === 'development') console.log(...params);
 };
 
 const error = (...params: Array<string | undefined>): void => {

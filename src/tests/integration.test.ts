@@ -32,6 +32,17 @@ const CREATE_USER = gql`
   }
 `;
 
+const DELETE_USER = gql`
+  mutation deleteUser($username: String!) {
+    deleteUser(
+      username: $username
+    ) {
+      username,
+      fullname
+    }
+  }
+`;
+
 const LIST_USERS = gql`
   query {
     listUsers {
@@ -122,12 +133,28 @@ describe('Mutations', () => {
       password: '12345'
     }});
 
-    interface Data {
+    interface LoginData {
       token: string
     }
 
-    const loginData = res.data && res.data.login ? res.data.login as Data : { token: '' };
+    const loginData = res.data && res.data.login ? res.data.login as LoginData : { token: '' };
     expect(loginData.token).toHaveLength(173);
+  });
+
+  it('user can be deleted', async () => {
+    const { mutate } = createTestClient(server);
+
+    const res = await mutate({ mutation: DELETE_USER, variables: {
+      username: 'user'
+    }});
+
+    interface UserData {
+      username: string;
+      fullname: string;
+    }
+
+    const userData = res.data && res.data.deleteUser ? res.data.deleteUser as UserData : { username: '', fullname: '' };
+    expect(userData.fullname).toBe('Normal User');
   });
 });
 
@@ -136,14 +163,14 @@ describe('Queries', () => {
     const { query } = createTestClient(server);
     const res = await query({ query: LIST_USERS });
     
-    interface Data {
+    interface UserData {
       username: string,
       email: string,
       fullname: string,
       isAdmin: boolean
     }
 
-    const usersData = res.data && res.data.listUsers ? res.data.listUsers as Data[] : [];
+    const usersData = res.data && res.data.listUsers ? res.data.listUsers as UserData[] : [];
     expect(usersData).toHaveLength(3);
   });
 
@@ -151,12 +178,12 @@ describe('Queries', () => {
     const { query } = createTestClient(server);
     const res = await query({ query: GET_USER, variables: { username: 'admin' } });
 
-    interface Data {
+    interface UserData {
       id: string,
       fullname: string
     }
 
-    const userData = res.data && res.data.getUser ? res.data.getUser as Data : { id: '', fullname: '' };
+    const userData = res.data && res.data.getUser ? res.data.getUser as UserData : { id: '', fullname: '' };
     expect(userData.id).toHaveLength(24);
     expect(userData.fullname).toBe('Administrator');
   });
