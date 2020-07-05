@@ -42,22 +42,22 @@ export const resolvers = {
       return user;
     },
 
-    deleteUser: async (_root: undefined, args: { username: string }, _context: UserInContext): Promise<User|null> => {
+    deleteUser: async (_root: undefined, args: { username: string }, context: UserInContext): Promise<User|null> => {
       const user = await UserModel.findOne({ username: args.username });
       
-      //if (context.currentUser.isAdmin || (user && context.currentUser.id == user.id)) {
-      try {
-        await UserModel.findByIdAndRemove(user?.id);
-      }
-      catch (error) {
-        const message = isError(error) ? error.message : '';
-        throw new UserInputError(message, { invalidArgs: args });
+      if (context.currentUser.isAdmin || (user && context.currentUser.id == user.id)) {
+        try {
+          await UserModel.findByIdAndRemove(user?.id);
+        }
+        catch (error) {
+          const message = isError(error) ? error.message : '';
+          throw new UserInputError(message, { invalidArgs: args });
+        }
+
+        return user;
       }
 
-      return user;
-      //}
-
-      //throw new AuthenticationError('Not authenticated');
+      throw new AuthenticationError('Not authenticated');
     },
 
     login: async (_root: undefined, args: { username: string, password: string }): Promise<{ token: string }> => {

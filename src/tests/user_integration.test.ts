@@ -1,93 +1,10 @@
 import { createTestClient } from 'apollo-server-testing';
-import gql from 'graphql-tag';
 import bcrypt from 'bcrypt';
-
-import { server, mongoose } from '..';
+import { server, mongoose, typeDefs, resolvers, ApolloServer } from '..';
 import UserModel from '../models/user';
-
-const LOGIN = gql`
-  mutation login($username: String!, $password: String!) {
-    login(
-      username: $username,
-      password: $password
-    ) {
-      token
-    }
-  }
-`;
-
-const CREATE_USER = gql`
-  mutation createUser($username: String!, $password: String!, $email: String!, $fullname: String!) {
-    createUser(
-      username: $username,
-      password: $password,
-      email: $email,
-      fullname: $fullname
-    ) {
-      username,
-      email,
-      fullname,
-      isAdmin
-    }
-  }
-`;
-
-const DELETE_USER = gql`
-  mutation deleteUser($username: String!) {
-    deleteUser(
-      username: $username
-    ) {
-      username,
-      fullname
-    }
-  }
-`;
-
-const LIST_USERS = gql`
-  query {
-    listUsers {
-      username,
-      email,
-      fullname,
-      isAdmin
-    }
-  }
-`;
-
-const GET_USER = gql`
-  query getUser($username: String!) {
-    getUser(
-      username: $username
-    ) {
-      id,
-      fullname
-    }
-  }
-`;
-
-const initialUsers = [
-  {
-    username: 'admin',
-    password: '12345',
-    email: 'admin@test.fi',
-    fullname: 'Administrator',
-    isAdmin: true
-  },
-  {
-    username: 'user',
-    password: '00000',
-    email: 'user@test.fi',
-    fullname: 'Normal User',
-    isAdmin: false
-  },
-  {
-    username: 'special',
-    password: '99999',
-    email: 'special@admin.fi',
-    fullname: 'Special User',
-    isAdmin: false
-  }
-];
+import { createContextWithUser } from './utils/utils';
+import { initialUsers } from './utils/initialData';
+import Queries from './utils/userQueries';
 
 beforeEach(async () => {
   await UserModel.deleteMany({});
@@ -102,11 +19,15 @@ beforeEach(async () => {
   await UserModel.insertMany(userObjects);
 });
 
+afterAll(async () => {
+  await mongoose.disconnect();
+});
+
 describe('Mutations', () => {
   it('new user can be created', async () => {
     const { mutate } = createTestClient(server);
 
-    const res = await mutate({ mutation: CREATE_USER, variables: {
+    const res = await mutate({ mutation: Queries.CREATE_USER, variables: {
       username: 'testUser',
       password: '12345',
       email: 'test@test.fi',
@@ -128,7 +49,7 @@ describe('Mutations', () => {
   it('user can login and receives token', async () => {
     const { mutate } = createTestClient(server);
 
-    const res = await mutate({ mutation: LOGIN, variables: {
+    const res = await mutate({ mutation: Queries.LOGIN, variables: {
       username: 'admin',
       password: '12345'
     }});
@@ -141,10 +62,60 @@ describe('Mutations', () => {
     expect(loginData.token).toHaveLength(173);
   });
 
-  it('user can be deleted', async () => {
-    const { mutate } = createTestClient(server);
+  it('user can delete own account', async () => {
+    const { mutate } = createTestClient(
+      new ApolloServer({
+        typeDefs,
+        resolvers,
+        context: createContextWithUser('user')
+      })
+    );
 
-    const res = await mutate({ mutation: DELETE_USER, variables: {
+    const res = await mutate({ mutation: Queries.DELETE_USER, variables: {
+      username: 'user'
+    }});
+
+    interface UserData {
+      username: string;
+      fullname: string;
+    }
+
+    const userData = res.data && res.data.deleteUser ? res.data.deleteUser as UserData : { username: '', fullname: '' };
+    expect(userData.fullname).toBe('Normal User');
+  });
+
+  it('user cannot delete other account', async () => {
+    const { mutate } = createTestClient(
+      new ApolloServer({
+        typeDefs,
+        resolvers,
+        context: createContextWithUser('special')
+      })
+    );
+
+    const res = await mutate({ mutation: Queries.DELETE_USER, variables: {
+      username: 'user'
+    }});
+
+    interface UserData {
+      username: string;
+      fullname: string;
+    }
+
+    const userData = res.data && res.data.deleteUser ? res.data.deleteUser as UserData : { username: '', fullname: '' };
+    expect(userData.fullname).not.toBe('Normal User');
+  });
+
+  it('admin can delete any account', async () => {
+    const { mutate } = createTestClient(
+      new ApolloServer({
+        typeDefs,
+        resolvers,
+        context: createContextWithUser('admin')
+      })
+    );
+
+    const res = await mutate({ mutation: Queries.DELETE_USER, variables: {
       username: 'user'
     }});
 
@@ -161,7 +132,7 @@ describe('Mutations', () => {
 describe('Queries', () => {
   it('lists all users', async () => {
     const { query } = createTestClient(server);
-    const res = await query({ query: LIST_USERS });
+    const res = await query({ query: Queries.LIST_USERS });
     
     interface UserData {
       username: string,
@@ -176,7 +147,7 @@ describe('Queries', () => {
 
   it('finds user by username', async () => {
     const { query } = createTestClient(server);
-    const res = await query({ query: GET_USER, variables: { username: 'admin' } });
+    const res = await query({ query: Queries.GET_USER, variables: { username: 'admin' } });
 
     interface UserData {
       id: string,
@@ -187,8 +158,4 @@ describe('Queries', () => {
     expect(userData.id).toHaveLength(24);
     expect(userData.fullname).toBe('Administrator');
   });
-});
-
-afterAll(async () => {
-  await mongoose.disconnect();
 });
