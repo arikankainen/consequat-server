@@ -23,8 +23,8 @@ afterAll(async () => {
   await mongoose.disconnect();
 });
 
-describe('Mutations', () => {
-  it('new user can be created', async () => {
+describe('user creation', () => {
+  it('new user with unique username can be created', async () => {
     const { mutate } = createTestClient(server);
 
     const res = await mutate({ mutation: Queries.CREATE_USER, variables: {
@@ -46,7 +46,22 @@ describe('Mutations', () => {
     expect(res.data).toEqual(createdUserData);
   });
 
-  it('user can login and receives token', async () => {
+  it('new user with existing username cannot be created', async () => {
+    const { mutate } = createTestClient(server);
+
+    const res = await mutate({ mutation: Queries.CREATE_USER, variables: {
+      username: 'user',
+      password: '12345',
+      email: 'user@test.fi',
+      fullname: 'Existing User'
+    }});
+    
+    expect(res.data).toEqual({ createUser: null });
+  });
+});
+
+describe('login', () => {
+  it('user with correct credentials can login and receives token', async () => {
     const { mutate } = createTestClient(server);
 
     const res = await mutate({ mutation: Queries.LOGIN, variables: {
@@ -62,6 +77,24 @@ describe('Mutations', () => {
     expect(loginData.token).toHaveLength(173);
   });
 
+  it('user with incorrect credentials cannot login and receives empty token', async () => {
+    const { mutate } = createTestClient(server);
+
+    const res = await mutate({ mutation: Queries.LOGIN, variables: {
+      username: 'admin',
+      password: 'wrong'
+    }});
+
+    interface LoginData {
+      token: string
+    }
+
+    const loginData = res.data && res.data.login ? res.data.login as LoginData : { token: '' };
+    expect(loginData.token).toHaveLength(0);
+  });
+});
+
+describe('user deletion', () => {
   it('user can delete own account', async () => {
     const { mutate } = createTestClient(
       new ApolloServer({
@@ -129,7 +162,7 @@ describe('Mutations', () => {
   });
 });
 
-describe('Queries', () => {
+describe('queries', () => {
   it('lists all users', async () => {
     const { query } = createTestClient(server);
     const res = await query({ query: Queries.LIST_USERS });
