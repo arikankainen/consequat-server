@@ -14,8 +14,12 @@ export const resolvers = {
       return await UserModel.find({});
     },
     
-    getUser: async (_root: undefined, args: { username: string }): Promise<User|null> => {
+    getUser: async (_root: undefined, args: { username: string }): Promise<User | null> => {
       return await UserModel.findOne({ username: args.username });
+    },
+
+    me: async (_root: undefined, _args: undefined, context: UserInContext): Promise<{ username: string, id: string } | null> => {
+      return await UserModel.findById(context.currentUser.id);
     }
   },
   Mutation: {
@@ -42,7 +46,7 @@ export const resolvers = {
       return user;
     },
 
-    deleteUser: async (_root: undefined, args: { username: string }, context: UserInContext): Promise<User|null> => {
+    deleteUser: async (_root: undefined, args: { username: string }, context: UserInContext): Promise<User | null> => {
       const user = await UserModel.findOne({ username: args.username });
       
       if (context.currentUser.isAdmin || (user && context.currentUser.id == user.id)) {

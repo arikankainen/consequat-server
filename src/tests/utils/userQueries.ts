@@ -60,10 +60,20 @@ const GET_USER = gql`
   }
 `;
 
+const ME = gql`
+  query me {
+    me {
+      id,
+      fullname
+    }
+  }
+`;
+
 export default {
   LOGIN,
   CREATE_USER,
   DELETE_USER,
   LIST_USERS,
-  GET_USER
+  GET_USER,
+  ME
 };

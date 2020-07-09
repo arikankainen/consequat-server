@@ -162,6 +162,28 @@ describe('user deletion', () => {
   });
 });
 
+describe('own info', () => {
+  it('user can query own information', async () => {
+    const { query } = createTestClient(
+      new ApolloServer({
+        typeDefs,
+        resolvers,
+        context: createContextWithUser('user')
+      })
+    );
+
+    const res = await query({ query: Queries.ME });
+
+    interface UserData {
+      fullname: string;
+      id: string;
+    }
+
+    const userData = res.data && res.data.me ? res.data.me as UserData : { fullname: '', id: '' };
+    expect(userData.fullname).toBe('Normal User');
+  });
+});
+
 describe('queries', () => {
   it('lists all users', async () => {
     const { query } = createTestClient(server);

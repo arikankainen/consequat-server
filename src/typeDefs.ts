@@ -15,6 +15,7 @@ export const typeDefs = gql`
   }
 
   type Query {
+    me: User
     listUsers: [User!]
     getUser(username: String): User!
   }
