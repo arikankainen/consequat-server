@@ -9,6 +9,8 @@ import jwt from 'jsonwebtoken';
 import UserModel, { User } from './models/user';
 import { UserInToken } from './utils/types';
 import { IncomingMessage } from 'http';
+import { Storage } from '@google-cloud/storage';
+import path from 'path';
 
 mongoose.set('useFindAndModify', false);
 mongoose.set('useCreateIndex', true);
@@ -56,6 +58,15 @@ if (process.env.NODE_ENV !== 'test') {
       Logger.log(`Server ready at ${url}`);
     });
 }
+
+const gc = new Storage({
+  keyFilename: path.join(__dirname, '../google-cloud-service-key.json'),
+  projectId: 'key-reference-282507',
+});
+
+void gc.getBuckets().then(x => console.log('Google Cloud Storage bucket:', x));
+
+//const bucket = gc.bucket('consequat');
 
 export {
   typeDefs,
