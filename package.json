@@ -6,7 +6,11 @@
   "scripts": {
     "start": "cross-env NODE_ENV=production ts-node src/index.ts",
     "dev": "cross-env NODE_ENV=development ts-node-dev src/index.ts",
-    "test": "cross-env NODE_ENV=test jest --verbose --runInBand --detectOpenHandles"
+    "test": "cross-env NODE_ENV=test jest --verbose --runInBand --detectOpenHandles",
+    "build:ui": "rmdir /s /q build & cd ../client && npm run build --prod && xcopy build ..\\server\\build\\ /s /e /y",
+    "build:ui-dev": "rmdir /s /q build & cd ../client && npm run build && xcopy build ..\\server\\build\\ /s /e /y",
+    "deploy": "git push heroku master",
+    "deploy:full": "git add . && git commit -m heroku && npm run deploy && heroku logs --tail"
   },
   "repository": {
     "type": "git",
