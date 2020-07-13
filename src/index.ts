@@ -1,4 +1,6 @@
-import { ApolloServer } from 'apollo-server';
+import express from 'express';
+import cors from 'cors';
+import { ApolloServer } from 'apollo-server-express';
 import mongoose from 'mongoose';
 import { MONGODB_URI, JWT_PRIVATE_KEY } from './utils/config';
 import { isError } from './utils/typeguards';
@@ -9,6 +11,7 @@ import jwt from 'jsonwebtoken';
 import UserModel, { User } from './models/user';
 import { UserInToken } from './utils/types';
 import { IncomingMessage } from 'http';
+
 
 mongoose.set('useFindAndModify', false);
 mongoose.set('useCreateIndex', true);
@@ -49,6 +52,21 @@ const server = new ApolloServer({
   context
 });
 
+const app = express();
+app.use(cors());
+app.use(express.static('build'));
+
+server.applyMiddleware({ app });
+
+const port = process.env.PORT || 4000;
+
+if (process.env.NODE_ENV !== 'test') {
+  app.listen(port, () => {
+    Logger.log(`Server ready at http://localhost:${port}`);
+  });
+}
+
+/* // to use without 'express'
 if (process.env.NODE_ENV !== 'test') {
   void server
     .listen({ port: process.env.PORT || 4000 })
@@ -56,6 +74,7 @@ if (process.env.NODE_ENV !== 'test') {
       Logger.log(`Server ready at ${url}`);
     });
 }
+*/
 
 export {
   typeDefs,

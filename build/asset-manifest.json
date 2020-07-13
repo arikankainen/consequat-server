@@ -1,0 +1,27 @@
+{
+  "files": {
+    "main.js": "/static/js/main.514ee27b.chunk.js",
+    "main.js.map": "/static/js/main.514ee27b.chunk.js.map",
+    "runtime-main.js": "/static/js/runtime-main.21e63127.js",
+    "runtime-main.js.map": "/static/js/runtime-main.21e63127.js.map",
+    "static/js/2.1aff5a30.chunk.js": "/static/js/2.1aff5a30.chunk.js",
+    "static/js/2.1aff5a30.chunk.js.map": "/static/js/2.1aff5a30.chunk.js.map",
+    "index.html": "/index.html",
+    "precache-manifest.2d78fba589114e607f65953f6618fbfc.js": "/precache-manifest.2d78fba589114e607f65953f6618fbfc.js",
+    "service-worker.js": "/service-worker.js",
+    "static/js/2.1aff5a30.chunk.js.LICENSE.txt": "/static/js/2.1aff5a30.chunk.js.LICENSE.txt",
+    "static/media/consequat_top2.png": "/static/media/consequat_top2.493eeabb.png",
+    "static/media/menu_image.205a8432.svg": "/static/media/menu_image.205a8432.svg",
+    "static/media/menu_logout.144ff030.svg": "/static/media/menu_logout.144ff030.svg",
+    "static/media/menu_search.c6a0effb.svg": "/static/media/menu_search.c6a0effb.svg",
+    "static/media/menu_settings.9f07a3df.svg": "/static/media/menu_settings.9f07a3df.svg",
+    "static/media/menu_theme.ce890c5a.svg": "/static/media/menu_theme.ce890c5a.svg",
+    "static/media/menu_upload.221b309e.svg": "/static/media/menu_upload.221b309e.svg",
+    "static/media/menu_user.a617dfb6.svg": "/static/media/menu_user.a617dfb6.svg"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.21e63127.js",
+    "static/js/2.1aff5a30.chunk.js",
+    "static/js/main.514ee27b.chunk.js"
+  ]
+}

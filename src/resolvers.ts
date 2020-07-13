@@ -1,4 +1,4 @@
-import { UserInputError, AuthenticationError } from 'apollo-server';
+import { UserInputError, AuthenticationError } from 'apollo-server-express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
