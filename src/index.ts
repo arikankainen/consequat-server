@@ -11,6 +11,7 @@ import jwt from 'jsonwebtoken';
 import UserModel, { User } from './models/user';
 import { UserInToken } from './utils/types';
 import { IncomingMessage } from 'http';
+import path from 'path';
 
 
 mongoose.set('useFindAndModify', false);
@@ -55,6 +56,10 @@ const server = new ApolloServer({
 const app = express();
 app.use(cors());
 app.use(express.static('build'));
+
+app.get('*', (_req, res) => {
+  res.sendFile('index.html', { root: path.join(__dirname, '../build/')});
+});
 
 server.applyMiddleware({ app });
 
