@@ -33,7 +33,7 @@ if (MONGODB_URI) {
   Logger.error('MONGODB_URI not specified');
 }
 
-const context = async ({ req }: {req: IncomingMessage}): Promise<{ currentUser: User|null }> => {
+const context = async ({ req }: { req: IncomingMessage }): Promise<{ currentUser: User | null }> => {
   const auth = req ? req.headers.authorization : null;
   let currentUser = null;
 
@@ -57,9 +57,11 @@ const app = express();
 app.use(cors());
 app.use(express.static('build'));
 
+/*
 app.get('*', (_req, res) => {
-  res.sendFile('index.html', { root: path.join(__dirname, '../build/')});
+  res.sendFile('index.html', { root: path.join(__dirname, '../build/') });
 });
+*/
 
 server.applyMiddleware({ app });
 
@@ -68,6 +70,7 @@ const port = process.env.PORT || 4000;
 if (process.env.NODE_ENV !== 'test') {
   app.listen(port, () => {
     Logger.log(`Server ready at http://localhost:${port}`);
+    Logger.log(`GraphQL playground available at http://localhost:${port}${server.graphqlPath}`);
   });
 }
 
