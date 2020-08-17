@@ -12,6 +12,7 @@ export const photoResolver = {
       return await PhotoModel.find({}).populate('user');
     }
   },
+
   Mutation: {
     addPhoto: async (_root: undefined, args: Photo, context: UserInContext): Promise<Photo | null> => {
       const currentUser = context.currentUser;
@@ -24,6 +25,7 @@ export const photoResolver = {
         mainUrl: args.mainUrl,
         thumbUrl: args.thumbUrl,
         name: args.name,
+        description: args.description,
         user: currentUser.id,
       });
 

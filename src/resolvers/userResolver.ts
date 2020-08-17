@@ -22,6 +22,7 @@ export const userResolver = {
       return await UserModel.findById(context.currentUser.id).populate('photos');
     }
   },
+
   Mutation: {
     createUser: async (_root: undefined, args: User): Promise<User> => {
       const saltRounds = 10;

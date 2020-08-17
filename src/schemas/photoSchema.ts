@@ -5,6 +5,8 @@ export const photoSchema = gql`
     mainUrl: String!
     thumbUrl: String!
     name: String!
+    description: String
+    dateAdded: String
     user: User!
     id: ID!
   }
@@ -18,6 +20,7 @@ export const photoSchema = gql`
       mainUrl: String!
       thumbUrl: String!
       name: String!
+      description: String
     ): Photo
   }
 `;

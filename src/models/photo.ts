@@ -5,6 +5,8 @@ export interface Photo extends mongoose.Document {
   mainUrl: string;
   thumbUrl: string;
   name: string;
+  description: string;
+  dateAdded: string;
   user: string;
   id: string;
 }
@@ -26,6 +28,11 @@ const photoSchema: mongoose.Schema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
+  },
+  description: String,
+  dateAdded: {
+    type: Date,
+    default: Date.now,
   },
   user: {
     type: mongoose.Schema.Types.ObjectId,
