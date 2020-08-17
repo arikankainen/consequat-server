@@ -33,6 +33,7 @@
     "ts-node-dev": "^1.0.0-pre.49"
   },
   "dependencies": {
+    "@graphql-tools/merge": "^6.0.18",
     "@types/bcrypt": "^3.0.0",
     "@types/cors": "^2.8.6",
     "@types/express": "^4.17.7",

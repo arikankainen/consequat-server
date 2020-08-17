@@ -5,13 +5,13 @@ import mongoose from 'mongoose';
 import { MONGODB_URI, JWT_PRIVATE_KEY } from './utils/config';
 import { isError } from './utils/typeguards';
 import Logger from './utils/logger';
-import { typeDefs } from './typeDefs';
-import { resolvers } from './resolvers';
+import typeDefs from './schemas/schemas';
+import resolvers from './resolvers/resolvers';
 import jwt from 'jsonwebtoken';
 import UserModel, { User } from './models/user';
 import { UserInToken } from './utils/types';
 import { IncomingMessage } from 'http';
-import path from 'path';
+//import path from 'path';
 
 
 mongoose.set('useFindAndModify', false);
