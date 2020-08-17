@@ -22,5 +22,9 @@ export const photoSchema = gql`
       name: String!
       description: String
     ): Photo
+
+    deletePhoto(
+      id: ID!
+    ): Photo
   }
 `;

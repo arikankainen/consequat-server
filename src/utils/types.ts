@@ -9,6 +9,7 @@ export interface UserInContext {
     password: string;
     email: string;
     isAdmin: boolean;
+    photos: string[];
     id: string;
   }
 }

@@ -7,7 +7,7 @@ export interface User extends mongoose.Document {
   email: string;
   fullname: string;
   isAdmin: boolean;
-  photos: string;
+  photos: string[];
   id: string;
 }
 
