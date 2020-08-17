@@ -5,6 +5,7 @@ export const photoSchema = gql`
     mainUrl: String!
     thumbUrl: String!
     name: String!
+    user: User!
     id: ID!
   }
 

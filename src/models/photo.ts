@@ -5,6 +5,7 @@ export interface Photo extends mongoose.Document {
   mainUrl: string;
   thumbUrl: string;
   name: string;
+  user: string;
   id: string;
 }
 
@@ -26,6 +27,10 @@ const photoSchema: mongoose.Schema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  }
 });
 
 photoSchema.plugin(uniqueValidator);
