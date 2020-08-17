@@ -19,6 +19,7 @@ export const userResolver = {
     },
 
     me: async (_root: undefined, _args: undefined, context: UserInContext): Promise<{ username: string, id: string } | null> => {
+      console.log(context);
       return await UserModel.findById(context.currentUser.id);
     }
   },
