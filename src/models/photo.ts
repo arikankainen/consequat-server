@@ -4,6 +4,7 @@ import uniqueValidator from 'mongoose-unique-validator';
 export interface Photo extends mongoose.Document {
   mainUrl: string;
   thumbUrl: string;
+  originalFilename: string;
   name: string;
   description: string;
   dateAdded: string;
@@ -23,6 +24,10 @@ const photoSchema: mongoose.Schema = new mongoose.Schema({
   thumbUrl: {
     type: String,
     unique: true,
+    required: true,
+  },
+  originalFilename: {
+    type: String,
     required: true,
   },
   name: {

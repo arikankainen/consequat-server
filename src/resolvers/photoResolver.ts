@@ -24,6 +24,7 @@ export const photoResolver = {
       const photo = new PhotoModel({
         mainUrl: args.mainUrl,
         thumbUrl: args.thumbUrl,
+        originalFilename: args.originalFilename,
         name: args.name,
         description: args.description,
         user: currentUser.id,

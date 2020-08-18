@@ -4,6 +4,7 @@ export const photoSchema = gql`
   type Photo {
     mainUrl: String!
     thumbUrl: String!
+    originalFilename: String!
     name: String!
     description: String
     dateAdded: String
@@ -19,6 +20,7 @@ export const photoSchema = gql`
     addPhoto(
       mainUrl: String!
       thumbUrl: String!
+      originalFilename: String!
       name: String!
       description: String
     ): Photo
