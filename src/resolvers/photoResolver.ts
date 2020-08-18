@@ -50,9 +50,9 @@ export const photoResolver = {
       return await photo.populate('user').execPopulate();
     },
 
-    deletePhoto: async (_root: undefined, args: { id: number }, context: UserInContext): Promise<Photo | null> => {
+    deletePhoto: async (_root: undefined, args: { id: string }, context: UserInContext): Promise<Photo | null> => {
       const currentUser = context.currentUser;
-      const id = String(args.id);
+      const id = args.id;
       const isOwnPhoto = currentUser.photos.includes(id);
 
       if (!currentUser || (!currentUser.isAdmin && !isOwnPhoto)) {
@@ -74,6 +74,32 @@ export const photoResolver = {
       }
 
       return photo;
-    }
+    },
+
+    editPhoto: async (_root: undefined, args: Photo, context: UserInContext): Promise<Photo | null> => {
+      const currentUser = context.currentUser;
+      const id = args.id;
+      const isOwnPhoto = currentUser.photos.includes(id);
+
+      if (!currentUser || (!currentUser.isAdmin && !isOwnPhoto)) {
+        throw new AuthenticationError('Not authenticated');
+      }
+
+      const photo = await PhotoModel.findById(args.id);
+
+      if (photo) {
+        if (args.name) photo.name = args.name;
+        if (args.description) photo.description = args.description;
+
+        try {
+          await photo.save();
+        } catch (error) {
+          const message = isError(error) ? error.message : '';
+          throw new Error(message);
+        }
+      }
+
+      return photo;
+    },
   },
 };

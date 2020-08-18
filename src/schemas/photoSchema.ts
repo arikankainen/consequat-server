@@ -26,5 +26,11 @@ export const photoSchema = gql`
     deletePhoto(
       id: ID!
     ): Photo
+
+    editPhoto(
+      name: String
+      description: String
+      id: ID!
+    ): Photo
   }
 `;
