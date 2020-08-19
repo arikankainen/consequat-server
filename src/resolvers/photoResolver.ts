@@ -58,6 +58,8 @@ export const photoResolver = {
       const id = args.id;
       const isOwnPhoto = currentUser.photos.includes(id);
 
+      console.log('user', currentUser.id);
+
       if (!currentUser || (!currentUser.isAdmin && !isOwnPhoto)) {
         throw new AuthenticationError('Not authenticated');
       }
@@ -66,12 +68,15 @@ export const photoResolver = {
       const user = await UserModel.findById(currentUser.id);
 
       if (user) {
+        console.log('photo removed, id:', id);
         user.photos = user.photos.filter(item => item != id);
 
         try {
           await user.save();
+          console.log('user saved');
         } catch (error) {
           const message = isError(error) ? error.message : '';
+          console.log('error', message);
           throw new Error(message);
         }
       }
