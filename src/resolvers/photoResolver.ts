@@ -5,6 +5,7 @@ import PhotoModel, { Photo } from '../models/photo';
 import UserModel from '../models/user';
 import { UserInContext } from '../utils/types';
 import { isError } from '../utils/typeguards';
+import { startSession } from 'mongoose';
 
 export const photoResolver = {
   Query: {
@@ -58,28 +59,12 @@ export const photoResolver = {
       const id = args.id;
       const isOwnPhoto = currentUser.photos.includes(id);
 
-      console.log('user', currentUser.id);
-
       if (!currentUser || (!currentUser.isAdmin && !isOwnPhoto)) {
         throw new AuthenticationError('Not authenticated');
       }
 
       const photo = await PhotoModel.findByIdAndDelete(args.id);
-      const user = await UserModel.findById(currentUser.id);
-
-      if (user) {
-        console.log('photo removed, id:', id);
-        user.photos = user.photos.filter(item => item != id);
-
-        try {
-          await user.save();
-          console.log('user saved');
-        } catch (error) {
-          const message = isError(error) ? error.message : '';
-          console.log('error', message);
-          throw new Error(message);
-        }
-      }
+      await UserModel.findByIdAndUpdate({ _id: currentUser.id }, { $pullAll: { photos: [id] } });
 
       return photo;
     },
