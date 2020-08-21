@@ -11,8 +11,7 @@ import jwt from 'jsonwebtoken';
 import UserModel, { User } from './models/user';
 import { UserInToken } from './utils/types';
 import { IncomingMessage } from 'http';
-//import path from 'path';
-
+import path from 'path';
 
 mongoose.set('useFindAndModify', false);
 mongoose.set('useCreateIndex', true);
@@ -57,11 +56,12 @@ const app = express();
 app.use(cors());
 app.use(express.static('build'));
 
-/*
+// allaoleva estää GraphQL playgroundin toiminnan, mutta ilman sitä ei toimi herokussa refreshaus
+
 app.get('*', (_req, res) => {
   res.sendFile('index.html', { root: path.join(__dirname, '../build/') });
 });
-*/
+
 
 server.applyMiddleware({ app });
 
