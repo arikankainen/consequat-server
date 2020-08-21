@@ -5,7 +5,6 @@ import PhotoModel, { Photo } from '../models/photo';
 import UserModel from '../models/user';
 import { UserInContext } from '../utils/types';
 import { isError } from '../utils/typeguards';
-import { startSession } from 'mongoose';
 
 export const photoResolver = {
   Query: {
