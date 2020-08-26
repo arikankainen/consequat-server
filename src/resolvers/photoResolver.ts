@@ -1,5 +1,3 @@
-//import Logger from '../utils/logger';
-
 import { AuthenticationError } from 'apollo-server-express';
 import PhotoModel, { Photo } from '../models/photo';
 import UserModel from '../models/user';
@@ -28,6 +26,7 @@ export const photoResolver = {
         thumbFilename: args.thumbFilename,
         originalFilename: args.originalFilename,
         name: args.name,
+        location: args.location,
         description: args.description,
         user: currentUser.id,
       });
@@ -81,6 +80,7 @@ export const photoResolver = {
 
       if (photo) {
         photo.name = args.name ? args.name : '';
+        photo.location = args.location ? args.location : '';
         photo.description = args.description ? args.description : '';
 
         try {

@@ -11,15 +11,15 @@ import Logger from '../utils/logger';
 export const userResolver = {
   Query: {
     listUsers: async (): Promise<User[]> => {
-      return await UserModel.find({}).populate('photos');
+      return await UserModel.find({}).populate('photos').populate('albums');
     },
 
     getUser: async (_root: undefined, args: { username: string }): Promise<User | null> => {
-      return await UserModel.findOne({ username: args.username }).populate('photos');
+      return await UserModel.findOne({ username: args.username }).populate('photos').populate('albums');
     },
 
     me: async (_root: undefined, _args: undefined, context: UserInContext): Promise<User | null> => {
-      return await UserModel.findById(context.currentUser.id).populate('photos');
+      return await UserModel.findById(context.currentUser.id).populate('photos').populate('albums');
     }
   },
 

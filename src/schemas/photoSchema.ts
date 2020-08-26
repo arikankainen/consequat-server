@@ -8,6 +8,7 @@ export const photoSchema = gql`
     thumbFilename: String!
     originalFilename: String!
     name: String
+    location: String
     description: String
     dateAdded: String
     user: User!
@@ -26,6 +27,7 @@ export const photoSchema = gql`
       thumbFilename: String!
       originalFilename: String!
       name: String
+      location: String
       description: String
     ): Photo
 
@@ -35,6 +37,7 @@ export const photoSchema = gql`
 
     editPhoto(
       name: String
+      location: String
       description: String
       id: ID!
     ): Photo

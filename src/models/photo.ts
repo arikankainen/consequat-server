@@ -8,6 +8,7 @@ export interface Photo extends mongoose.Document {
   thumbFilename: string;
   originalFilename: string;
   name: string;
+  location: string;
   description: string;
   dateAdded: string;
   user: string;
@@ -41,6 +42,7 @@ const photoSchema: mongoose.Schema = new mongoose.Schema({
     required: true,
   },
   name: String,
+  location: String,
   description: String,
   dateAdded: {
     type: Date,

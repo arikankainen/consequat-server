@@ -8,6 +8,7 @@ export const userSchema = gql`
     fullname: String!
     isAdmin: Boolean!
     photos: [Photo!]
+    albums: [Album!]
     id: ID!
   }
 

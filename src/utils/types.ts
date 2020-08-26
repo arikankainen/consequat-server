@@ -10,6 +10,7 @@ export interface UserInContext {
     email: string;
     isAdmin: boolean;
     photos: string[];
+    albums: string[];
     id: string;
   }
 }

@@ -8,6 +8,7 @@ export interface User extends mongoose.Document {
   fullname: string;
   isAdmin: boolean;
   photos: string[];
+  albums: string[];
   id: string;
 }
 
@@ -29,6 +30,12 @@ const userSchema: mongoose.Schema = new mongoose.Schema({
     {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Photo'
+    }
+  ],
+  albums: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Album'
     }
   ],
 });
