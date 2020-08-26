@@ -40,10 +40,7 @@ const photoSchema: mongoose.Schema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  name: {
-    type: String,
-    required: true,
-  },
+  name: String,
   description: String,
   dateAdded: {
     type: Date,

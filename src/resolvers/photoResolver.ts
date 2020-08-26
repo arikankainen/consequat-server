@@ -80,8 +80,8 @@ export const photoResolver = {
       const photo = await PhotoModel.findById(args.id);
 
       if (photo) {
-        if (args.name) photo.name = args.name;
-        if (args.description) photo.description = args.description;
+        photo.name = args.name ? args.name : '';
+        photo.description = args.description ? args.description : '';
 
         try {
           await photo.save();
