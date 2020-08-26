@@ -12,7 +12,7 @@ export interface Photo extends mongoose.Document {
   description: string;
   dateAdded: string;
   user: string;
-  album: string;
+  album: string | null;
   id: string;
 }
 

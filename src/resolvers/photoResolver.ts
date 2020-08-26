@@ -8,7 +8,7 @@ import { isError } from '../utils/typeguards';
 export const photoResolver = {
   Query: {
     listPhotos: async (): Promise<Photo[]> => {
-      return await PhotoModel.find({}).populate('user');
+      return await PhotoModel.find({}).populate('user').populate('album');
     }
   },
 
@@ -29,7 +29,7 @@ export const photoResolver = {
         name: args.name,
         location: args.location,
         description: args.description,
-        album: args.album,
+        album: args.album || null,
         user: currentUser.id,
       });
 
@@ -109,10 +109,9 @@ export const photoResolver = {
             await AlbumModel.findByIdAndUpdate({ _id: newAlbum }, { $push: { photos: id } });
           }
         }
-
         photo.name = args.name ? args.name : '';
         photo.location = args.location ? args.location : '';
-        photo.album = args.album ? args.album : '';
+        photo.album = args.album ? args.album : null;
         photo.description = args.description ? args.description : '';
 
         try {

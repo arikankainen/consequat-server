@@ -7,7 +7,7 @@ import { isError } from '../utils/typeguards';
 export const albumResolver = {
   Query: {
     listAlbums: async (): Promise<Album[]> => {
-      return await AlbumModel.find({}).populate('user').populate('photo');
+      return await AlbumModel.find({}).populate('user').populate('photos');
     }
   },
 
