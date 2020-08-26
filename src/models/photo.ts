@@ -12,6 +12,7 @@ export interface Photo extends mongoose.Document {
   description: string;
   dateAdded: string;
   user: string;
+  album: string;
   id: string;
 }
 
@@ -51,6 +52,10 @@ const photoSchema: mongoose.Schema = new mongoose.Schema({
   user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'
+  },
+  album: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Album'
   }
 });
 

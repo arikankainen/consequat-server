@@ -12,6 +12,7 @@ export const photoSchema = gql`
     description: String
     dateAdded: String
     user: User!
+    album: Album
     id: ID!
   }
 
@@ -29,6 +30,7 @@ export const photoSchema = gql`
       name: String
       location: String
       description: String
+      album: String
     ): Photo
 
     deletePhoto(
@@ -39,6 +41,7 @@ export const photoSchema = gql`
       name: String
       location: String
       description: String
+      album: String
       id: ID!
     ): Photo
   }

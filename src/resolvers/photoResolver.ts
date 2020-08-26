@@ -1,6 +1,7 @@
 import { AuthenticationError } from 'apollo-server-express';
 import PhotoModel, { Photo } from '../models/photo';
 import UserModel from '../models/user';
+import AlbumModel from '../models/album';
 import { UserInContext } from '../utils/types';
 import { isError } from '../utils/typeguards';
 
@@ -28,6 +29,7 @@ export const photoResolver = {
         name: args.name,
         location: args.location,
         description: args.description,
+        album: args.album,
         user: currentUser.id,
       });
 
@@ -39,6 +41,19 @@ export const photoResolver = {
         } catch (error) {
           const message = isError(error) ? error.message : '';
           throw new Error(message);
+        }
+      }
+
+      if (args.album) {
+        const album = await AlbumModel.findById(args.album);
+        if (album) {
+          album.photos = album.photos.concat(photo.id);
+          try {
+            await album.save();
+          } catch (error) {
+            const message = isError(error) ? error.message : '';
+            throw new Error(message);
+          }
         }
       }
 
@@ -64,6 +79,10 @@ export const photoResolver = {
       const photo = await PhotoModel.findByIdAndDelete(args.id);
       await UserModel.findByIdAndUpdate({ _id: currentUser.id }, { $pullAll: { photos: [id] } });
 
+      if (photo) {
+        await AlbumModel.findByIdAndUpdate({ _id: photo.album }, { $pullAll: { photos: [id] } });
+      }
+
       return photo;
     },
 
@@ -79,8 +98,21 @@ export const photoResolver = {
       const photo = await PhotoModel.findById(args.id);
 
       if (photo) {
+        const oldAlbum = photo.album;
+        const newAlbum = args.album;
+
+        if (oldAlbum !== newAlbum) {
+          if (oldAlbum) {
+            await AlbumModel.findByIdAndUpdate({ _id: oldAlbum }, { $pull: { photos: id } });
+          }
+          if (newAlbum) {
+            await AlbumModel.findByIdAndUpdate({ _id: newAlbum }, { $push: { photos: id } });
+          }
+        }
+
         photo.name = args.name ? args.name : '';
         photo.location = args.location ? args.location : '';
+        photo.album = args.album ? args.album : '';
         photo.description = args.description ? args.description : '';
 
         try {
