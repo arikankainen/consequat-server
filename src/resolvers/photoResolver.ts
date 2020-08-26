@@ -8,7 +8,10 @@ import { isError } from '../utils/typeguards';
 export const photoResolver = {
   Query: {
     listPhotos: async (): Promise<Photo[]> => {
-      return await PhotoModel.find({}).populate('user').populate('album');
+      return await PhotoModel
+        .find({})
+        .populate('user')
+        .populate('album');
     }
   },
 

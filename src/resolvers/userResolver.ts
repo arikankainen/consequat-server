@@ -19,7 +19,20 @@ export const userResolver = {
     },
 
     me: async (_root: undefined, _args: undefined, context: UserInContext): Promise<User | null> => {
-      return await UserModel.findById(context.currentUser.id).populate('photos').populate('albums');
+      return await UserModel
+        .findById(context.currentUser.id)
+        .populate({
+          path: 'photos',
+          populate: {
+            path: 'album'
+          }
+        })
+        .populate({
+          path: 'albums',
+          populate: {
+            path: 'photos'
+          }
+        });
     }
   },
 
