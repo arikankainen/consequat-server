@@ -75,5 +75,5 @@ export default {
   DELETE_USER,
   LIST_USERS,
   GET_USER,
-  ME
+  ME,
 };

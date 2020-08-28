@@ -8,11 +8,15 @@ export const albumResolver = {
   Query: {
     listAlbums: async (): Promise<Album[]> => {
       return await AlbumModel.find({}).populate('user').populate('photos');
-    }
+    },
   },
 
   Mutation: {
-    createAlbum: async (_root: undefined, args: Album, context: UserInContext): Promise<Album | null> => {
+    createAlbum: async (
+      _root: undefined,
+      args: Album,
+      context: UserInContext
+    ): Promise<Album | null> => {
       const currentUser = context.currentUser;
 
       if (!currentUser) {
@@ -46,7 +50,11 @@ export const albumResolver = {
       return await album.populate('user').execPopulate();
     },
 
-    deleteAlbum: async (_root: undefined, args: { id: string }, context: UserInContext): Promise<Album | null> => {
+    deleteAlbum: async (
+      _root: undefined,
+      args: { id: string },
+      context: UserInContext
+    ): Promise<Album | null> => {
       const currentUser = context.currentUser;
       const id = args.id;
       const isOwnAlbum = currentUser.albums.includes(id);
@@ -56,12 +64,19 @@ export const albumResolver = {
       }
 
       const album = await AlbumModel.findByIdAndDelete(args.id);
-      await UserModel.findByIdAndUpdate({ _id: currentUser.id }, { $pullAll: { albums: [id] } });
+      await UserModel.findByIdAndUpdate(
+        { _id: currentUser.id },
+        { $pullAll: { albums: [id] } }
+      );
 
       return album;
     },
 
-    editAlbum: async (_root: undefined, args: Album, context: UserInContext): Promise<Album | null> => {
+    editAlbum: async (
+      _root: undefined,
+      args: Album,
+      context: UserInContext
+    ): Promise<Album | null> => {
       const currentUser = context.currentUser;
       const id = args.id;
       const isOwnAlbum = currentUser.albums.includes(id);

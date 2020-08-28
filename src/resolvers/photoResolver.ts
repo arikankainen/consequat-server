@@ -8,15 +8,16 @@ import { isError } from '../utils/typeguards';
 export const photoResolver = {
   Query: {
     listPhotos: async (): Promise<Photo[]> => {
-      return await PhotoModel
-        .find({})
-        .populate('user')
-        .populate('album');
-    }
+      return await PhotoModel.find({}).populate('user').populate('album');
+    },
   },
 
   Mutation: {
-    addPhoto: async (_root: undefined, args: Photo, context: UserInContext): Promise<Photo | null> => {
+    addPhoto: async (
+      _root: undefined,
+      args: Photo,
+      context: UserInContext
+    ): Promise<Photo | null> => {
       const currentUser = context.currentUser;
 
       if (!currentUser) {
@@ -70,7 +71,11 @@ export const photoResolver = {
       return await photo.populate('user').execPopulate();
     },
 
-    deletePhoto: async (_root: undefined, args: { id: string }, context: UserInContext): Promise<Photo | null> => {
+    deletePhoto: async (
+      _root: undefined,
+      args: { id: string },
+      context: UserInContext
+    ): Promise<Photo | null> => {
       const currentUser = context.currentUser;
       const id = args.id;
       const isOwnPhoto = currentUser.photos.includes(id);
@@ -79,16 +84,26 @@ export const photoResolver = {
         throw new AuthenticationError('Not authenticated');
       }
       const photo = await PhotoModel.findByIdAndDelete(args.id);
-      await UserModel.findByIdAndUpdate({ _id: currentUser.id }, { $pullAll: { photos: [id] } });
+      await UserModel.findByIdAndUpdate(
+        { _id: currentUser.id },
+        { $pullAll: { photos: [id] } }
+      );
 
       if (photo && photo.album) {
-        await AlbumModel.findByIdAndUpdate({ _id: photo.album }, { $pullAll: { photos: [id] } });
+        await AlbumModel.findByIdAndUpdate(
+          { _id: photo.album },
+          { $pullAll: { photos: [id] } }
+        );
       }
 
       return photo;
     },
 
-    editPhoto: async (_root: undefined, args: Photo, context: UserInContext): Promise<Photo | null> => {
+    editPhoto: async (
+      _root: undefined,
+      args: Photo,
+      context: UserInContext
+    ): Promise<Photo | null> => {
       const currentUser = context.currentUser;
       const id = args.id;
       const isOwnPhoto = currentUser.photos.includes(id);
@@ -105,10 +120,16 @@ export const photoResolver = {
 
         if (oldAlbum !== newAlbum) {
           if (oldAlbum) {
-            await AlbumModel.findByIdAndUpdate({ _id: oldAlbum }, { $pull: { photos: id } });
+            await AlbumModel.findByIdAndUpdate(
+              { _id: oldAlbum },
+              { $pull: { photos: id } }
+            );
           }
           if (newAlbum) {
-            await AlbumModel.findByIdAndUpdate({ _id: newAlbum }, { $push: { photos: id } });
+            await AlbumModel.findByIdAndUpdate(
+              { _id: newAlbum },
+              { $push: { photos: id } }
+            );
           }
         }
         photo.name = args.name ? args.name : '';

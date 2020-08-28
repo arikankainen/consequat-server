@@ -20,7 +20,7 @@ const userSchema: mongoose.Schema = new mongoose.Schema({
     type: String,
     unique: true,
     required: true,
-    minlength: [3, 'username must be at least 3 characters']
+    minlength: [3, 'username must be at least 3 characters'],
   },
   password: String,
   email: String,
@@ -29,14 +29,14 @@ const userSchema: mongoose.Schema = new mongoose.Schema({
   photos: [
     {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Photo'
-    }
+      ref: 'Photo',
+    },
   ],
   albums: [
     {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Album'
-    }
+      ref: 'Album',
+    },
   ],
 });
 

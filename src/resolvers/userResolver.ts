@@ -14,26 +14,34 @@ export const userResolver = {
       return await UserModel.find({}).populate('photos').populate('albums');
     },
 
-    getUser: async (_root: undefined, args: { username: string }): Promise<User | null> => {
-      return await UserModel.findOne({ username: args.username }).populate('photos').populate('albums');
+    getUser: async (
+      _root: undefined,
+      args: { username: string }
+    ): Promise<User | null> => {
+      return await UserModel.findOne({ username: args.username })
+        .populate('photos')
+        .populate('albums');
     },
 
-    me: async (_root: undefined, _args: undefined, context: UserInContext): Promise<User | null> => {
-      return await UserModel
-        .findById(context.currentUser.id)
+    me: async (
+      _root: undefined,
+      _args: undefined,
+      context: UserInContext
+    ): Promise<User | null> => {
+      return await UserModel.findById(context.currentUser.id)
         .populate({
           path: 'photos',
           populate: {
-            path: 'album'
-          }
+            path: 'album',
+          },
         })
         .populate({
           path: 'albums',
           populate: {
-            path: 'photos'
-          }
+            path: 'photos',
+          },
         });
-    }
+    },
   },
 
   Mutation: {
@@ -46,13 +54,12 @@ export const userResolver = {
         password: passwordHash,
         email: args.email,
         fullname: args.fullname,
-        isAdmin: false
+        isAdmin: false,
       });
 
       try {
         await user.save();
-      }
-      catch (error) {
+      } catch (error) {
         const message = isError(error) ? error.message : '';
         throw new UserInputError(message, { invalidArgs: args });
       }
@@ -60,14 +67,20 @@ export const userResolver = {
       return user;
     },
 
-    deleteUser: async (_root: undefined, args: { username: string }, context: UserInContext): Promise<User | null> => {
+    deleteUser: async (
+      _root: undefined,
+      args: { username: string },
+      context: UserInContext
+    ): Promise<User | null> => {
       const user = await UserModel.findOne({ username: args.username });
 
-      if (context.currentUser.isAdmin || (user && context.currentUser.id == user.id)) {
+      if (
+        context.currentUser.isAdmin ||
+        (user && context.currentUser.id == user.id)
+      ) {
         try {
           await UserModel.findByIdAndRemove(user?.id);
-        }
-        catch (error) {
+        } catch (error) {
           const message = isError(error) ? error.message : '';
           throw new UserInputError(message, { invalidArgs: args });
         }
@@ -78,9 +91,15 @@ export const userResolver = {
       throw new AuthenticationError('Not authenticated');
     },
 
-    login: async (_root: undefined, args: { username: string, password: string }): Promise<{ token: string }> => {
+    login: async (
+      _root: undefined,
+      args: { username: string; password: string }
+    ): Promise<{ token: string }> => {
       const user = await UserModel.findOne({ username: args.username });
-      const passwordCorrect = user === null ? false : await bcrypt.compare(args.password, user.password);
+      const passwordCorrect =
+        user === null
+          ? false
+          : await bcrypt.compare(args.password, user.password);
 
       if (!(user && passwordCorrect)) {
         throw new UserInputError('Wrong credentials');
@@ -88,16 +107,15 @@ export const userResolver = {
 
       const userForToken = {
         username: user.username,
-        id: user.id
+        id: user.id,
       };
 
       if (JWT_PRIVATE_KEY) {
         return { token: jwt.sign(userForToken, JWT_PRIVATE_KEY) };
-      }
-      else {
+      } else {
         Logger.log('JWT_PRIVATE_KEY not specified');
         return { token: '' };
       }
-    }
-  }
+    },
+  },
 };

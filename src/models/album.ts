@@ -21,13 +21,13 @@ const albumSchema: mongoose.Schema = new mongoose.Schema({
   photos: [
     {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Photo'
-    }
+      ref: 'Photo',
+    },
   ],
   user: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
-  }
+    ref: 'User',
+  },
 });
 
 albumSchema.plugin(uniqueValidator);

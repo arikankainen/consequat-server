@@ -8,5 +8,5 @@ const error = (...params: Array<string | undefined>): void => {
 
 export default {
   log,
-  error
+  error,
 };

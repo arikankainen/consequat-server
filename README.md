@@ -1,4 +1,4 @@
-"# consequat-server" 
+"# consequat-server"
 
 Heroku:
 https://powerful-woodland-28415.herokuapp.com/

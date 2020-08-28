@@ -51,12 +51,12 @@ const photoSchema: mongoose.Schema = new mongoose.Schema({
   },
   user: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
+    ref: 'User',
   },
   album: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Album'
-  }
+    ref: 'Album',
+  },
 });
 
 photoSchema.plugin(uniqueValidator);
