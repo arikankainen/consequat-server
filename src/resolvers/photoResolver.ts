@@ -118,7 +118,7 @@ export const photoResolver = {
         const oldAlbum = photo.album;
         const newAlbum = args.album;
 
-        if (oldAlbum !== newAlbum) {
+        if (oldAlbum?.toString() !== newAlbum?.toString()) {
           if (oldAlbum) {
             await AlbumModel.findByIdAndUpdate(
               { _id: oldAlbum },
