@@ -182,16 +182,18 @@ export const photoResolver = {
       session.startTransaction();
 
       try {
-        await AlbumModel.updateMany(
-          { photos: { $in: id } },
-          { $pullAll: { photos: id } }
-        );
-
-        if (args.album) {
+        if (args.album !== undefined) {
           await AlbumModel.updateMany(
-            { _id: args.album },
-            { $push: { photos: { $each: id } } }
+            { photos: { $in: id } },
+            { $pullAll: { photos: id } }
           );
+
+          if (args.album !== null) {
+            await AlbumModel.updateMany(
+              { _id: args.album },
+              { $push: { photos: { $each: id } } }
+            );
+          }
         }
 
         const fields = { ...args };
