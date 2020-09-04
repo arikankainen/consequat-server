@@ -176,16 +176,23 @@ export const photoResolver = {
         throw new AuthenticationError('Not authenticated');
       }
 
+      await AlbumModel.updateMany({ photos: { $in: id } }, { $pullAll: { photos: id } });
+
+      if (args.album) {
+        await AlbumModel.updateMany(
+          { _id: args.album },
+          { $push: { photos: { $each: id } } }
+        );
+      }
+
       const fields = { ...args };
       delete fields['id'];
 
-      await PhotoModel.updateMany(
-        { _id: { $in: args.id } },
-        { $set: { ...fields } },
-        { multi: true }
-      );
+      await PhotoModel.updateMany({ _id: { $in: args.id } }, { $set: fields });
 
-      return null;
+      const photos = await PhotoModel.find({ _id: { $in: args.id } });
+
+      return photos;
     },
   },
 };
