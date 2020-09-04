@@ -44,5 +44,13 @@ export const photoSchema = gql`
       album: String
       id: ID!
     ): Photo
+
+    editPhotos(
+      name: String
+      location: String
+      description: String
+      album: String
+      id: [ID!]!
+    ): [Photo]
   }
 `;

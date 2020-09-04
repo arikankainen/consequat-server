@@ -64,11 +64,11 @@ app.use(cors());
 app.use(express.static('build'));
 
 // allaoleva estää GraphQL playgroundin toiminnan, mutta ilman sitä ei toimi herokussa refreshaus
-
+/*
 app.get('*', (_req, res) => {
   res.sendFile('index.html', { root: path.join(__dirname, '../build/') });
 });
-
+*/
 server.applyMiddleware({ app });
 
 const port = process.env.PORT || 4000;

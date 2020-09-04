@@ -5,6 +5,20 @@ import AlbumModel from '../models/album';
 import { UserInContext } from '../utils/types';
 import { isError } from '../utils/typeguards';
 
+interface Photo2 {
+  mainUrl?: string;
+  thumbUrl?: string;
+  filename?: string;
+  thumbFilename?: string;
+  originalFilename?: string;
+  name?: string;
+  location?: string;
+  description?: string;
+  dateAdded?: string;
+  album?: string;
+  id: string[];
+}
+
 export const photoResolver = {
   Query: {
     listPhotos: async (): Promise<Photo[]> => {
@@ -146,6 +160,32 @@ export const photoResolver = {
       }
 
       return photo;
+    },
+
+    editPhotos: async (
+      _root: undefined,
+      args: Photo2,
+      context: UserInContext
+    ): Promise<Photo[] | null> => {
+      const currentUser = context.currentUser;
+      const id = args.id;
+
+      const isOwnPhoto = id.every((value) => currentUser.photos.includes(value));
+
+      if (!currentUser || (!currentUser.isAdmin && !isOwnPhoto)) {
+        throw new AuthenticationError('Not authenticated');
+      }
+
+      const fields = { ...args };
+      delete fields['id'];
+
+      await PhotoModel.updateMany(
+        { _id: { $in: args.id } },
+        { $set: { ...fields } },
+        { multi: true }
+      );
+
+      return null;
     },
   },
 };
