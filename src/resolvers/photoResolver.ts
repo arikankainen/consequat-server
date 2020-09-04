@@ -4,6 +4,8 @@ import UserModel from '../models/user';
 import AlbumModel from '../models/album';
 import { UserInContext } from '../utils/types';
 import { isError } from '../utils/typeguards';
+import mongoose from 'mongoose';
+import logger from '../utils/logger';
 
 interface Photo2 {
   mainUrl?: string;
@@ -176,22 +178,37 @@ export const photoResolver = {
         throw new AuthenticationError('Not authenticated');
       }
 
-      await AlbumModel.updateMany({ photos: { $in: id } }, { $pullAll: { photos: id } });
+      const session = await mongoose.startSession();
+      session.startTransaction();
 
-      if (args.album) {
+      try {
         await AlbumModel.updateMany(
-          { _id: args.album },
-          { $push: { photos: { $each: id } } }
+          { photos: { $in: id } },
+          { $pullAll: { photos: id } }
         );
+
+        if (args.album) {
+          await AlbumModel.updateMany(
+            { _id: args.album },
+            { $push: { photos: { $each: id } } }
+          );
+        }
+
+        const fields = { ...args };
+        delete fields['id'];
+
+        await PhotoModel.updateMany({ _id: { $in: args.id } }, { $set: fields });
+
+        await session.commitTransaction();
+      } catch (error) {
+        logger.error(error);
+
+        await session.abortTransaction();
+      } finally {
+        session.endSession();
       }
 
-      const fields = { ...args };
-      delete fields['id'];
-
-      await PhotoModel.updateMany({ _id: { $in: args.id } }, { $set: fields });
-
       const photos = await PhotoModel.find({ _id: { $in: args.id } });
-
       return photos;
     },
   },
