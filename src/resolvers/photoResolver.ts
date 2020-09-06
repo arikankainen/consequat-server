@@ -46,9 +46,9 @@ export const photoResolver = {
         filename: args.filename,
         thumbFilename: args.thumbFilename,
         originalFilename: args.originalFilename,
-        name: args.name,
-        location: args.location,
-        description: args.description,
+        name: args.name || '',
+        location: args.location || '',
+        description: args.description || '',
         album: args.album || null,
         user: currentUser.id,
       });
