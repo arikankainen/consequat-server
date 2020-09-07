@@ -23,7 +23,11 @@ const userSchema: mongoose.Schema = new mongoose.Schema({
     minlength: [3, 'username must be at least 3 characters'],
   },
   password: String,
-  email: String,
+  email: {
+    type: String,
+    unique: true,
+    required: true,
+  },
   fullname: String,
   isAdmin: Boolean,
   photos: [

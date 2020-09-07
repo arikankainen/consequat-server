@@ -1,6 +1,7 @@
 import { UserInputError, AuthenticationError } from 'apollo-server-express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import * as Yup from 'yup';
 
 import { JWT_PRIVATE_KEY } from '../utils/config';
 import UserModel, { User } from '../models/user';
@@ -49,6 +50,26 @@ export const userResolver = {
       const saltRounds = 10;
       const passwordHash = await bcrypt.hash(args.password, saltRounds);
 
+      const validation = Yup.object().shape({
+        username: Yup.string()
+          .min(3, 'username must be at least 3 characters')
+          .required('username required'),
+        email: Yup.string()
+          .email('email must be valid e-mail')
+          .required('email required'),
+        fullname: Yup.string().required('full name required'),
+        password: Yup.string()
+          .min(5, 'password must be at least 5 characters')
+          .required('password required'),
+      });
+
+      try {
+        await validation.validate(args);
+      } catch (error) {
+        const message = isError(error) ? error.message : '';
+        throw new UserInputError(message, { invalidArgs: args });
+      }
+
       const user = new UserModel({
         username: args.username,
         password: passwordHash,
@@ -74,10 +95,7 @@ export const userResolver = {
     ): Promise<User | null> => {
       const user = await UserModel.findOne({ username: args.username });
 
-      if (
-        context.currentUser.isAdmin ||
-        (user && context.currentUser.id == user.id)
-      ) {
+      if (context.currentUser.isAdmin || (user && context.currentUser.id == user.id)) {
         try {
           await UserModel.findByIdAndRemove(user?.id);
         } catch (error) {
@@ -97,9 +115,7 @@ export const userResolver = {
     ): Promise<{ token: string }> => {
       const user = await UserModel.findOne({ username: args.username });
       const passwordCorrect =
-        user === null
-          ? false
-          : await bcrypt.compare(args.password, user.password);
+        user === null ? false : await bcrypt.compare(args.password, user.password);
 
       if (!(user && passwordCorrect)) {
         throw new UserInputError('Wrong credentials');
