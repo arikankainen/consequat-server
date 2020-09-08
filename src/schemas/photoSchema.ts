@@ -38,7 +38,7 @@ export const photoSchema = gql`
     ): Photo
 
     editPhoto(
-      name: String
+      name: String!
       location: String
       description: String
       album: String

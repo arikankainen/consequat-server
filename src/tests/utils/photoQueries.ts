@@ -45,7 +45,71 @@ const ADD_PHOTO = gql`
   }
 `;
 
+const DELETE_PHOTO = gql`
+  mutation deletePhoto(
+    $id: ID!,
+  ) {
+    deletePhoto(
+      id: $id,
+    ) {
+      filename,
+      name,
+      description,
+      id,
+    }
+  }
+`;
+
+const EDIT_PHOTO = gql`
+  mutation editPhoto(
+    $id: ID!,
+    $name: String!,
+    $location: String,
+    $description: String,
+    $album: String,
+  ) {
+    editPhoto(
+      id: $id,
+      name: $name,
+      location: $location,
+      description: $description,
+      album: $album,
+    ) {
+      id,
+      name,
+      location,
+      description,
+    }
+  }
+`;
+
+const EDIT_PHOTOS = gql`
+  mutation editPhotos(
+    $id: [ID!]!,
+    $name: String,
+    $location: String,
+    $description: String,
+    $album: String,
+  ) {
+    editPhotos(
+      id: $id,
+      name: $name,
+      location: $location,
+      description: $description,
+      album: $album,
+    ) {
+      id,
+      name,
+      location,
+      description,
+    }
+  }
+`;
+
 export default {
   LIST_PHOTOS,
   ADD_PHOTO,
+  DELETE_PHOTO,
+  EDIT_PHOTO,
+  EDIT_PHOTOS,
 };

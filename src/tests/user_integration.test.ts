@@ -1,8 +1,8 @@
 import { createTestClient } from 'apollo-server-testing';
 import { server, mongoose, typeDefs, resolvers, ApolloServer } from '..';
-import { createContextWithUser } from './utils/utils';
+import { createContextWithUser } from './utils/helpers';
 import Queries from './utils/userQueries';
-import { prepareInitialUsers } from './utils/utils';
+import { prepareInitialUsers } from './utils/helpers';
 
 beforeEach(async () => {
   await prepareInitialUsers();
