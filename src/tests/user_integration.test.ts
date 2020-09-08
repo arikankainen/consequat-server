@@ -26,7 +26,7 @@ afterAll(async () => {
 });
 
 describe('user creation', () => {
-  it('new user with unique username can be created', async () => {
+  it('new user with unique username and email can be created', async () => {
     const { mutate } = createTestClient(server);
 
     const res = await mutate({
@@ -48,6 +48,7 @@ describe('user creation', () => {
       },
     };
 
+    expect(res.errors).toBe(undefined);
     expect(res.data).toEqual(createdUserData);
   });
 
@@ -59,12 +60,178 @@ describe('user creation', () => {
       variables: {
         username: 'user',
         password: '12345',
-        email: 'user@test.fi',
-        fullname: 'Existing User',
+        email: 'test@test.fi',
+        fullname: 'Test User',
       },
     });
 
+    let error = '';
+    if (res.errors) error = res.errors[0].message;
+
+    expect(error).toMatch(/expected `username` to be unique/);
     expect(res.data).toEqual({ createUser: null });
+  });
+
+  it('new user with existing email cannot be created', async () => {
+    const { mutate } = createTestClient(server);
+
+    const res = await mutate({
+      mutation: Queries.CREATE_USER,
+      variables: {
+        username: 'testUser',
+        password: '12345',
+        email: 'user@test.fi',
+        fullname: 'Test User',
+      },
+    });
+
+    let error = '';
+    if (res.errors) error = res.errors[0].message;
+
+    expect(error).toMatch(/expected `email` to be unique/);
+    expect(res.data).toEqual({ createUser: null });
+  });
+
+  it('new user with too short username cannot be created', async () => {
+    const { mutate } = createTestClient(server);
+
+    const res = await mutate({
+      mutation: Queries.CREATE_USER,
+      variables: {
+        username: 'ab',
+        password: '12345',
+        email: 'test@test.fi',
+        fullname: 'Short username',
+      },
+    });
+
+    let error = '';
+    if (res.errors) error = res.errors[0].message;
+
+    expect(error).toMatch(/username must be at least 3 characters/);
+    expect(res.data).toEqual({ createUser: null });
+  });
+
+  it('new user with too short password cannot be created', async () => {
+    const { mutate } = createTestClient(server);
+
+    const res = await mutate({
+      mutation: Queries.CREATE_USER,
+      variables: {
+        username: 'testUser',
+        password: '1234',
+        email: 'test@test.fi',
+        fullname: 'Test User',
+      },
+    });
+
+    let error = '';
+    if (res.errors) error = res.errors[0].message;
+
+    expect(error).toMatch(/password must be at least 5 characters/);
+    expect(res.data).toEqual({ createUser: null });
+  });
+
+  it('new user with empty fullname cannot be created', async () => {
+    const { mutate } = createTestClient(server);
+
+    const res = await mutate({
+      mutation: Queries.CREATE_USER,
+      variables: {
+        username: 'testUser',
+        password: '12345',
+        email: 'test@test.fi',
+        fullname: '',
+      },
+    });
+
+    let error = '';
+    if (res.errors) error = res.errors[0].message;
+
+    expect(error).toMatch(/full name required/);
+    expect(res.data).toEqual({ createUser: null });
+  });
+
+  it('new user with missing fullname cannot be created', async () => {
+    const { mutate } = createTestClient(server);
+
+    const res = await mutate({
+      mutation: Queries.CREATE_USER,
+      variables: {
+        username: 'testUser',
+        password: '12345',
+        email: 'test@test.fi',
+      },
+    });
+
+    let error = '';
+    if (res.errors) error = res.errors[0].message;
+
+    expect(error).toMatch(
+      /Variable "\$fullname" of required type "String!" was not provided/
+    );
+    expect(res.data).not.toBeDefined();
+  });
+
+  it('new user with malformatted email cannot be created', async () => {
+    const { mutate } = createTestClient(server);
+
+    const res = await mutate({
+      mutation: Queries.CREATE_USER,
+      variables: {
+        username: 'testUser',
+        password: '12345',
+        email: 'notrealemail',
+        fullname: 'Test User',
+      },
+    });
+
+    let error = '';
+    if (res.errors) error = res.errors[0].message;
+
+    expect(error).toMatch(/email must be valid e-mail/);
+    expect(res.data).toEqual({ createUser: null });
+  });
+
+  it('new user with empty email cannot be created', async () => {
+    const { mutate } = createTestClient(server);
+
+    const res = await mutate({
+      mutation: Queries.CREATE_USER,
+      variables: {
+        username: 'testUser',
+        password: '12345',
+        email: '',
+        fullname: 'Test User',
+      },
+    });
+
+    let error = '';
+    if (res.errors) error = res.errors[0].message;
+
+    expect(error).toMatch(/email required/);
+    expect(res.data).toEqual({ createUser: null });
+  });
+
+  it('new user with missing email cannot be created', async () => {
+    const { mutate } = createTestClient(server);
+
+    const res = await mutate({
+      mutation: Queries.CREATE_USER,
+      variables: {
+        username: 'testUser',
+        password: '12345',
+        fullname: 'Test User',
+      },
+    });
+
+    let error = '';
+    if (res.errors) error = res.errors[0].message;
+
+    expect(error).toMatch(
+      /Variable "\$email" of required type "String!" was not provided/
+    );
+    expect(res.data).not.toBeDefined();
   });
 });
 
@@ -85,9 +252,7 @@ describe('login', () => {
     }
 
     const loginData =
-      res.data && res.data.login
-        ? (res.data.login as LoginData)
-        : { token: '' };
+      res.data && res.data.login ? (res.data.login as LoginData) : { token: '' };
     expect(loginData.token).toHaveLength(173);
   });
 
@@ -107,9 +272,7 @@ describe('login', () => {
     }
 
     const loginData =
-      res.data && res.data.login
-        ? (res.data.login as LoginData)
-        : { token: '' };
+      res.data && res.data.login ? (res.data.login as LoginData) : { token: '' };
     expect(loginData.token).toHaveLength(0);
   });
 });
@@ -218,9 +381,7 @@ describe('own info', () => {
     }
 
     const userData =
-      res.data && res.data.me
-        ? (res.data.me as UserData)
-        : { fullname: '', id: '' };
+      res.data && res.data.me ? (res.data.me as UserData) : { fullname: '', id: '' };
     expect(userData.fullname).toBe('Normal User');
   });
 });
