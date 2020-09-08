@@ -7,7 +7,7 @@ export const photoSchema = gql`
     filename: String!
     thumbFilename: String!
     originalFilename: String!
-    name: String
+    name: String!
     location: String
     description: String
     dateAdded: String

@@ -8,5 +8,5 @@
     "forceConsistentCasingInFileNames": true
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "**/*.test1.ts", "**/*.spec1.ts"]
+  "exclude": ["node_modules"]
 }

@@ -1,24 +1,11 @@
 import { createTestClient } from 'apollo-server-testing';
-import bcrypt from 'bcrypt';
 import { server, mongoose, typeDefs, resolvers, ApolloServer } from '..';
-import UserModel from '../models/user';
 import { createContextWithUser } from './utils/utils';
-import { initialUsers } from './utils/initialData';
 import Queries from './utils/userQueries';
+import { prepareInitialUsers } from './utils/utils';
 
 beforeEach(async () => {
-  await UserModel.deleteMany({});
-
-  const userObjects = await Promise.all(
-    initialUsers.map(async (user) => {
-      const saltRounds = 10;
-      const hash = await bcrypt.hash(user.password, saltRounds);
-      user = { ...user, password: hash };
-      return new UserModel(user);
-    })
-  );
-
-  await UserModel.insertMany(userObjects);
+  await prepareInitialUsers();
 });
 
 afterAll(async () => {
