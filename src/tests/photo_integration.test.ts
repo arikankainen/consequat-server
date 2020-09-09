@@ -1,6 +1,12 @@
 import { createTestClient } from 'apollo-server-testing';
 import { server, mongoose } from '..';
-import { photosInDb, prepareInitialAlbums, preparePhotosToAlbums } from './utils/helpers';
+import {
+  photosInDb,
+  prepareInitialAlbums,
+  preparePhotosToAlbums,
+  photosInAlbum,
+  albumsInDb,
+} from './utils/helpers';
 import Queries from './utils/photoQueries';
 import { testPhoto } from './utils/testData';
 import { initialPhotos } from './utils/initialData';
@@ -60,29 +66,40 @@ describe('photo deletion', () => {
     const { mutate } = createTestClientWithUser('user');
 
     const originalPhotos = await photosInDb();
-    const id = originalPhotos[0].id;
+
+    const photoToDelete = originalPhotos[0];
+    const photoId = photoToDelete.id;
+    const albumId = photoToDelete.album;
+
+    const originalPhotosInAlbum = await photosInAlbum(albumId);
 
     const res = await mutate({
       mutation: Queries.DELETE_PHOTO,
-      variables: { id },
+      variables: { id: photoId },
     });
 
     const updatedPhotos = await photosInDb();
+    const updatedPhotosInAlbum = await photosInAlbum(albumId);
 
     expect(res.errors).toBe(undefined);
     expect(originalPhotos).toHaveLength(initialPhotos.length);
     expect(updatedPhotos).toHaveLength(initialPhotos.length - 1);
+
+    expect(originalPhotosInAlbum).toContain(photoId);
+    expect(updatedPhotosInAlbum).not.toContain(photoId);
+    expect(updatedPhotosInAlbum).toHaveLength(originalPhotosInAlbum.length - 1);
   });
 
   it('user cannot delete other users photo', async () => {
     const { mutate } = createTestClientWithUser('special');
 
     const originalPhotos = await photosInDb();
-    const id = originalPhotos[0].id;
+    const photoToDelete = originalPhotos[0];
+    const photoId = photoToDelete.id;
 
     const res = await mutate({
       mutation: Queries.DELETE_PHOTO,
-      variables: { id },
+      variables: { id: photoId },
     });
     const updatedPhotos = await photosInDb();
 
@@ -98,18 +115,28 @@ describe('photo deletion', () => {
     const { mutate } = createTestClientWithUser('admin');
 
     const originalPhotos = await photosInDb();
-    const id = originalPhotos[0].id;
+
+    const photoToDelete = originalPhotos[0];
+    const photoId = photoToDelete.id;
+    const albumId = photoToDelete.album;
+
+    const originalPhotosInAlbum = await photosInAlbum(albumId);
 
     const res = await mutate({
       mutation: Queries.DELETE_PHOTO,
-      variables: { id },
+      variables: { id: photoId },
     });
 
     const updatedPhotos = await photosInDb();
+    const updatedPhotosInAlbum = await photosInAlbum(albumId);
 
     expect(res.errors).toBe(undefined);
     expect(originalPhotos).toHaveLength(initialPhotos.length);
     expect(updatedPhotos).toHaveLength(initialPhotos.length - 1);
+
+    expect(originalPhotosInAlbum).toContain(photoId);
+    expect(updatedPhotosInAlbum).not.toContain(photoId);
+    expect(updatedPhotosInAlbum).toHaveLength(originalPhotosInAlbum.length - 1);
   });
 });
 
@@ -118,14 +145,18 @@ describe('photo modification', () => {
     const { mutate } = createTestClientWithUser('user');
 
     const originalPhotos = await photosInDb();
-    const id = originalPhotos[0].id;
+    const originalAlbums = await albumsInDb();
+
+    const photoId = originalPhotos[0].id;
+    const oldAlbumId = originalPhotos[0].album;
+    const newAlbumId = originalAlbums[2].id;
 
     const modifiedPhoto = {
-      id,
+      id: photoId,
       name: 'Updated name',
       location: 'Updated location',
       description: 'Updated description',
-      album: null,
+      album: newAlbumId,
     };
 
     const res = await mutate({
@@ -134,12 +165,23 @@ describe('photo modification', () => {
     });
 
     const updatedPhotos = await photosInDb();
+    const updatedPhotosInOldAlbum = await photosInAlbum(oldAlbumId);
+    const updatedPhotosInNewAlbum = await photosInAlbum(newAlbumId);
+
     const updatedPhoto = updatedPhotos[0];
 
     expect(res.errors).toBe(undefined);
+
     expect(originalPhotos).toHaveLength(initialPhotos.length);
     expect(updatedPhotos).toHaveLength(initialPhotos.length);
+
     expect(updatedPhoto.name).toBe(modifiedPhoto.name);
+    expect(updatedPhoto.location).toBe(modifiedPhoto.location);
+    expect(updatedPhoto.description).toBe(modifiedPhoto.description);
+    expect(String(updatedPhoto.album)).toBe(modifiedPhoto.album);
+
+    expect(updatedPhotosInOldAlbum).not.toContain(photoId);
+    expect(updatedPhotosInNewAlbum).toContain(photoId);
   });
 
   it('user can modify multiple own photos', async () => {
@@ -168,7 +210,6 @@ describe('photo modification', () => {
       expect(updatedPhotos[i].name).toBe(modifiedPhoto.name);
       expect(updatedPhotos[i].location).toBe(initialPhotos[i].location);
       expect(updatedPhotos[i].description).toBe(initialPhotos[i].description);
-      expect(updatedPhotos[i].album).toBe(initialPhotos[i].album);
     }
   });
 
@@ -207,14 +248,18 @@ describe('photo modification', () => {
     const { mutate } = createTestClientWithUser('admin');
 
     const originalPhotos = await photosInDb();
-    const id = originalPhotos[0].id;
+    const originalAlbums = await albumsInDb();
+
+    const photoId = originalPhotos[0].id;
+    const oldAlbumId = originalPhotos[0].album;
+    const newAlbumId = originalAlbums[2].id;
 
     const modifiedPhoto = {
-      id,
+      id: photoId,
       name: 'Updated name',
       location: 'Updated location',
       description: 'Updated description',
-      album: null,
+      album: newAlbumId,
     };
 
     const res = await mutate({
@@ -223,12 +268,23 @@ describe('photo modification', () => {
     });
 
     const updatedPhotos = await photosInDb();
+    const updatedPhotosInOldAlbum = await photosInAlbum(oldAlbumId);
+    const updatedPhotosInNewAlbum = await photosInAlbum(newAlbumId);
+
     const updatedPhoto = updatedPhotos[0];
 
     expect(res.errors).toBe(undefined);
+
     expect(originalPhotos).toHaveLength(initialPhotos.length);
     expect(updatedPhotos).toHaveLength(initialPhotos.length);
+
     expect(updatedPhoto.name).toBe(modifiedPhoto.name);
+    expect(updatedPhoto.location).toBe(modifiedPhoto.location);
+    expect(updatedPhoto.description).toBe(modifiedPhoto.description);
+    expect(String(updatedPhoto.album)).toBe(modifiedPhoto.album);
+
+    expect(updatedPhotosInOldAlbum).not.toContain(photoId);
+    expect(updatedPhotosInNewAlbum).toContain(photoId);
   });
 });
 

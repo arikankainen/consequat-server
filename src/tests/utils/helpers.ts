@@ -38,6 +38,13 @@ export const albumsInDb = async (): Promise<Album[]> => {
   return albums;
 };
 
+export const photosInAlbum = async (id: string | null): Promise<string[]> => {
+  if (!id) return [];
+  const album = await AlbumModel.findById(id);
+  if (!album) return [];
+  return album.photos.map((photo) => String(photo));
+};
+
 export const prepareInitialUsers = async (): Promise<void> => {
   await UserModel.deleteMany({});
 
