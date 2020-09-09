@@ -24,6 +24,15 @@ describe('photo addition', () => {
   it('user can add new photo', async () => {
     const { mutate } = createTestClientWithUser('user');
 
+    const originalPhotos = await photosInDb();
+
+    const res = await mutate({
+      mutation: Queries.ADD_PHOTO,
+      variables: testPhoto,
+    });
+
+    const updatedPhotos = await photosInDb();
+
     interface PhotoData {
       filename: string;
       name: string;
@@ -33,15 +42,6 @@ describe('photo addition', () => {
       filename: '',
       name: '',
     };
-
-    const originalPhotos = await photosInDb();
-
-    const res = await mutate({
-      mutation: Queries.ADD_PHOTO,
-      variables: testPhoto,
-    });
-
-    const updatedPhotos = await photosInDb();
 
     const photoData: PhotoData =
       res.data && res.data.addPhoto ? (res.data.addPhoto as PhotoData) : emptyPhotoData;
@@ -199,6 +199,34 @@ describe('photo modification', () => {
     expect(originalPhotos).toHaveLength(5);
     expect(updatedPhotos).toHaveLength(5);
     expect(updatedName).not.toBe('Updated name');
+  });
+
+  it('admin can modify any photo', async () => {
+    const { mutate } = createTestClientWithUser('admin');
+
+    const originalPhotos = await photosInDb();
+    const id = originalPhotos[0].id;
+
+    const modifiedPhoto = {
+      id,
+      name: 'Updated name',
+      location: 'Updated location',
+      description: 'Updated description',
+      album: null,
+    };
+
+    const res = await mutate({
+      mutation: Queries.EDIT_PHOTO,
+      variables: modifiedPhoto,
+    });
+
+    const updatedPhotos = await photosInDb();
+    const updatedName = updatedPhotos[0].name;
+
+    expect(res.errors).toBe(undefined);
+    expect(originalPhotos).toHaveLength(5);
+    expect(updatedPhotos).toHaveLength(5);
+    expect(updatedName).toBe('Updated name');
   });
 });
 

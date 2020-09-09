@@ -84,3 +84,24 @@ export const initialPhotos = [
     user: '',
   },
 ];
+
+export const initialAlbums = [
+  {
+    name: 'Album1',
+    description: 'Description1',
+    photos: [],
+    user: '',
+  },
+  {
+    name: 'Album2',
+    description: 'Description2',
+    photos: [],
+    user: '',
+  },
+  {
+    name: 'Album3',
+    description: 'Description3',
+    photos: [],
+    user: '',
+  },
+];

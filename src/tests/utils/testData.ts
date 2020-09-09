@@ -8,3 +8,8 @@ export const testPhoto = {
   location: 'Photo location_test',
   description: 'Photo description_test',
 };
+
+export const testAlbum = {
+  name: 'Album_test',
+  description: 'Description_test',
+};
