@@ -1,6 +1,6 @@
 import { createTestClient } from 'apollo-server-testing';
-import { server, mongoose, typeDefs, resolvers, ApolloServer } from '..';
-import { createContextWithUser } from './utils/helpers';
+import { server, mongoose } from '..';
+import { createTestClientWithUser } from './utils/helpers';
 import Queries from './utils/userQueries';
 import { prepareInitialUsers } from './utils/helpers';
 
@@ -266,13 +266,7 @@ describe('login', () => {
 
 describe('user deletion', () => {
   it('user can delete own account', async () => {
-    const { mutate } = createTestClient(
-      new ApolloServer({
-        typeDefs,
-        resolvers,
-        context: createContextWithUser('user'),
-      })
-    );
+    const { mutate } = createTestClientWithUser('user');
 
     const res = await mutate({
       mutation: Queries.DELETE_USER,
@@ -294,13 +288,7 @@ describe('user deletion', () => {
   });
 
   it('user cannot delete other account', async () => {
-    const { mutate } = createTestClient(
-      new ApolloServer({
-        typeDefs,
-        resolvers,
-        context: createContextWithUser('special'),
-      })
-    );
+    const { mutate } = createTestClientWithUser('special');
 
     const res = await mutate({
       mutation: Queries.DELETE_USER,
@@ -322,13 +310,7 @@ describe('user deletion', () => {
   });
 
   it('admin can delete any account', async () => {
-    const { mutate } = createTestClient(
-      new ApolloServer({
-        typeDefs,
-        resolvers,
-        context: createContextWithUser('admin'),
-      })
-    );
+    const { mutate } = createTestClientWithUser('admin');
 
     const res = await mutate({
       mutation: Queries.DELETE_USER,
@@ -352,13 +334,7 @@ describe('user deletion', () => {
 
 describe('own info', () => {
   it('user can query own information', async () => {
-    const { query } = createTestClient(
-      new ApolloServer({
-        typeDefs,
-        resolvers,
-        context: createContextWithUser('user'),
-      })
-    );
+    const { query } = createTestClientWithUser('user');
 
     const res = await query({ query: Queries.ME });
 

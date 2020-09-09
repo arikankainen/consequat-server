@@ -1,10 +1,15 @@
 import { createTestClient } from 'apollo-server-testing';
-import { server, mongoose, typeDefs, resolvers, ApolloServer } from '..';
-import { createContextWithUser, photosInDb } from './utils/helpers';
-import { prepareInitialUsers, prepareInitialPhotos } from './utils/helpers';
+import { server, mongoose } from '..';
+import { photosInDb } from './utils/helpers';
 import Queries from './utils/photoQueries';
 import { testPhoto } from './utils/testData';
 import { initialPhotos } from './utils/initialData';
+
+import {
+  createTestClientWithUser,
+  prepareInitialUsers,
+  prepareInitialPhotos,
+} from './utils/helpers';
 
 beforeEach(async () => {
   await prepareInitialUsers();
@@ -17,13 +22,7 @@ afterAll(async () => {
 
 describe('photo addition', () => {
   it('user can add new photo', async () => {
-    const { mutate } = createTestClient(
-      new ApolloServer({
-        typeDefs,
-        resolvers,
-        context: createContextWithUser('user'),
-      })
-    );
+    const { mutate } = createTestClientWithUser('user');
 
     interface PhotoData {
       filename: string;
@@ -56,13 +55,7 @@ describe('photo addition', () => {
 
 describe('photo deletion', () => {
   it('user can delete own photo', async () => {
-    const { mutate } = createTestClient(
-      new ApolloServer({
-        typeDefs,
-        resolvers,
-        context: createContextWithUser('user'),
-      })
-    );
+    const { mutate } = createTestClientWithUser('user');
 
     const originalPhotos = await photosInDb();
     const id = originalPhotos[0].id;
@@ -80,13 +73,7 @@ describe('photo deletion', () => {
   });
 
   it('user cannot delete other users photo', async () => {
-    const { mutate } = createTestClient(
-      new ApolloServer({
-        typeDefs,
-        resolvers,
-        context: createContextWithUser('special'),
-      })
-    );
+    const { mutate } = createTestClientWithUser('special');
 
     const originalPhotos = await photosInDb();
     const id = originalPhotos[0].id;
@@ -106,13 +93,7 @@ describe('photo deletion', () => {
   });
 
   it('admin can delete any photo', async () => {
-    const { mutate } = createTestClient(
-      new ApolloServer({
-        typeDefs,
-        resolvers,
-        context: createContextWithUser('admin'),
-      })
-    );
+    const { mutate } = createTestClientWithUser('admin');
 
     const originalPhotos = await photosInDb();
     const id = originalPhotos[0].id;
@@ -132,13 +113,7 @@ describe('photo deletion', () => {
 
 describe('photo modification', () => {
   it('user can modify own photo', async () => {
-    const { mutate } = createTestClient(
-      new ApolloServer({
-        typeDefs,
-        resolvers,
-        context: createContextWithUser('user'),
-      })
-    );
+    const { mutate } = createTestClientWithUser('user');
 
     const originalPhotos = await photosInDb();
     const id = originalPhotos[0].id;
@@ -166,13 +141,7 @@ describe('photo modification', () => {
   });
 
   it('user can modify multiple own photos', async () => {
-    const { mutate } = createTestClient(
-      new ApolloServer({
-        typeDefs,
-        resolvers,
-        context: createContextWithUser('user'),
-      })
-    );
+    const { mutate } = createTestClientWithUser('user');
 
     const originalPhotos = await photosInDb();
     const id = originalPhotos.map((photo) => photo.id);
@@ -202,13 +171,7 @@ describe('photo modification', () => {
   });
 
   it('user cannot modify other users photo', async () => {
-    const { mutate } = createTestClient(
-      new ApolloServer({
-        typeDefs,
-        resolvers,
-        context: createContextWithUser('special'),
-      })
-    );
+    const { mutate } = createTestClientWithUser('special');
 
     const originalPhotos = await photosInDb();
     const id = originalPhotos[0].id;

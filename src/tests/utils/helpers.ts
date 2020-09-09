@@ -2,12 +2,24 @@ import bcrypt from 'bcrypt';
 import UserModel, { User } from '../../models/user';
 import PhotoModel, { Photo } from '../../models/photo';
 import { initialUsers, initialPhotos } from './initialData';
+import { createTestClient, ApolloServerTestClient } from 'apollo-server-testing';
+import { typeDefs, resolvers, ApolloServer } from '../..';
 
 export const createContextWithUser = (username: string) => {
   return async (): Promise<{ currentUser: User | null }> => {
     const currentUser = await UserModel.findOne({ username });
     return { currentUser };
   };
+};
+
+export const createTestClientWithUser = (user: string): ApolloServerTestClient => {
+  return createTestClient(
+    new ApolloServer({
+      typeDefs,
+      resolvers,
+      context: createContextWithUser(user),
+    })
+  );
 };
 
 export const photosInDb = async (): Promise<Photo[]> => {
