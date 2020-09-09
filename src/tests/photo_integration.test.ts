@@ -213,6 +213,44 @@ describe('photo modification', () => {
     }
   });
 
+  it('user can modify and move multiple own photos to new album', async () => {
+    const { mutate } = createTestClientWithUser('user');
+
+    const originalPhotos = await photosInDb();
+    const originalAlbums = await albumsInDb();
+    const photoIds = originalPhotos.map((photo) => photo.id);
+    const newAlbumId = originalAlbums[2].id;
+
+    const modifiedPhoto = {
+      id: photoIds,
+      name: 'Updated name',
+      album: newAlbumId,
+    };
+
+    const res = await mutate({
+      mutation: Queries.EDIT_PHOTOS,
+      variables: modifiedPhoto,
+    });
+
+    const updatedPhotos = await photosInDb();
+    const updatedAlbums = await albumsInDb();
+
+    expect(res.errors).toBe(undefined);
+    expect(originalPhotos).toHaveLength(initialPhotos.length);
+    expect(updatedPhotos).toHaveLength(initialPhotos.length);
+
+    for (let i = 0; i < initialPhotos.length; i++) {
+      expect(updatedPhotos[i].name).toBe(modifiedPhoto.name);
+      expect(updatedPhotos[i].location).toBe(initialPhotos[i].location);
+      expect(updatedPhotos[i].description).toBe(initialPhotos[i].description);
+      expect(String(updatedPhotos[i].album)).toBe(modifiedPhoto.album);
+    }
+
+    expect(updatedAlbums[0].photos).toHaveLength(0);
+    expect(updatedAlbums[1].photos).toHaveLength(0);
+    expect(updatedAlbums[2].photos).toHaveLength(initialPhotos.length);
+  });
+
   it('user cannot modify other users photo', async () => {
     const { mutate } = createTestClientWithUser('special');
 
