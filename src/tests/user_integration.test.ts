@@ -2,7 +2,8 @@ import { createTestClient } from 'apollo-server-testing';
 import { server, mongoose } from '..';
 import { createTestClientWithUser } from './utils/helpers';
 import Queries from './utils/userQueries';
-import { prepareInitialUsers } from './utils/helpers';
+import { prepareInitialUsers, usersInDb } from './utils/helpers';
+import { initialUsers } from './utils/initialData';
 
 beforeEach(async () => {
   await prepareInitialUsers();
@@ -16,6 +17,8 @@ describe('user creation', () => {
   it('new user with unique username and email can be created', async () => {
     const { mutate } = createTestClient(server);
 
+    const originalUsers = await usersInDb();
+
     const res = await mutate({
       mutation: Queries.CREATE_USER,
       variables: {
@@ -25,6 +28,8 @@ describe('user creation', () => {
         fullname: 'Test User',
       },
     });
+
+    const updatedUsers = await usersInDb();
 
     const createdUserData = {
       createUser: {
@@ -37,10 +42,14 @@ describe('user creation', () => {
 
     expect(res.errors).toBe(undefined);
     expect(res.data).toEqual(createdUserData);
+    expect(originalUsers).toHaveLength(initialUsers.length);
+    expect(updatedUsers).toHaveLength(initialUsers.length + 1);
   });
 
   it('new user with existing username cannot be created', async () => {
     const { mutate } = createTestClient(server);
+
+    const originalUsers = await usersInDb();
 
     const res = await mutate({
       mutation: Queries.CREATE_USER,
@@ -52,15 +61,21 @@ describe('user creation', () => {
       },
     });
 
+    const updatedUsers = await usersInDb();
+
     let error = '';
     if (res.errors) error = res.errors[0].message;
 
     expect(error).toMatch(/expected `username` to be unique/);
     expect(res.data).toEqual({ createUser: null });
+    expect(originalUsers).toHaveLength(initialUsers.length);
+    expect(updatedUsers).toHaveLength(initialUsers.length);
   });
 
   it('new user with existing email cannot be created', async () => {
     const { mutate } = createTestClient(server);
+
+    const originalUsers = await usersInDb();
 
     const res = await mutate({
       mutation: Queries.CREATE_USER,
@@ -72,15 +87,21 @@ describe('user creation', () => {
       },
     });
 
+    const updatedUsers = await usersInDb();
+
     let error = '';
     if (res.errors) error = res.errors[0].message;
 
     expect(error).toMatch(/expected `email` to be unique/);
     expect(res.data).toEqual({ createUser: null });
+    expect(originalUsers).toHaveLength(initialUsers.length);
+    expect(updatedUsers).toHaveLength(initialUsers.length);
   });
 
   it('new user with too short username cannot be created', async () => {
     const { mutate } = createTestClient(server);
+
+    const originalUsers = await usersInDb();
 
     const res = await mutate({
       mutation: Queries.CREATE_USER,
@@ -92,15 +113,21 @@ describe('user creation', () => {
       },
     });
 
+    const updatedUsers = await usersInDb();
+
     let error = '';
     if (res.errors) error = res.errors[0].message;
 
     expect(error).toMatch(/username must be at least 3 characters/);
     expect(res.data).toEqual({ createUser: null });
+    expect(originalUsers).toHaveLength(initialUsers.length);
+    expect(updatedUsers).toHaveLength(initialUsers.length);
   });
 
   it('new user with too short password cannot be created', async () => {
     const { mutate } = createTestClient(server);
+
+    const originalUsers = await usersInDb();
 
     const res = await mutate({
       mutation: Queries.CREATE_USER,
@@ -112,15 +139,21 @@ describe('user creation', () => {
       },
     });
 
+    const updatedUsers = await usersInDb();
+
     let error = '';
     if (res.errors) error = res.errors[0].message;
 
     expect(error).toMatch(/password must be at least 5 characters/);
     expect(res.data).toEqual({ createUser: null });
+    expect(originalUsers).toHaveLength(initialUsers.length);
+    expect(updatedUsers).toHaveLength(initialUsers.length);
   });
 
   it('new user with empty fullname cannot be created', async () => {
     const { mutate } = createTestClient(server);
+
+    const originalUsers = await usersInDb();
 
     const res = await mutate({
       mutation: Queries.CREATE_USER,
@@ -132,15 +165,21 @@ describe('user creation', () => {
       },
     });
 
+    const updatedUsers = await usersInDb();
+
     let error = '';
     if (res.errors) error = res.errors[0].message;
 
     expect(error).toMatch(/full name required/);
     expect(res.data).toEqual({ createUser: null });
+    expect(originalUsers).toHaveLength(initialUsers.length);
+    expect(updatedUsers).toHaveLength(initialUsers.length);
   });
 
   it('new user with missing fullname cannot be created', async () => {
     const { mutate } = createTestClient(server);
+
+    const originalUsers = await usersInDb();
 
     const res = await mutate({
       mutation: Queries.CREATE_USER,
@@ -151,6 +190,8 @@ describe('user creation', () => {
       },
     });
 
+    const updatedUsers = await usersInDb();
+
     let error = '';
     if (res.errors) error = res.errors[0].message;
 
@@ -158,10 +199,14 @@ describe('user creation', () => {
       /Variable "\$fullname" of required type "String!" was not provided/
     );
     expect(res.data).not.toBeDefined();
+    expect(originalUsers).toHaveLength(initialUsers.length);
+    expect(updatedUsers).toHaveLength(initialUsers.length);
   });
 
   it('new user with malformatted email cannot be created', async () => {
     const { mutate } = createTestClient(server);
+
+    const originalUsers = await usersInDb();
 
     const res = await mutate({
       mutation: Queries.CREATE_USER,
@@ -173,15 +218,21 @@ describe('user creation', () => {
       },
     });
 
+    const updatedUsers = await usersInDb();
+
     let error = '';
     if (res.errors) error = res.errors[0].message;
 
     expect(error).toMatch(/email must be valid e-mail/);
     expect(res.data).toEqual({ createUser: null });
+    expect(originalUsers).toHaveLength(initialUsers.length);
+    expect(updatedUsers).toHaveLength(initialUsers.length);
   });
 
   it('new user with empty email cannot be created', async () => {
     const { mutate } = createTestClient(server);
+
+    const originalUsers = await usersInDb();
 
     const res = await mutate({
       mutation: Queries.CREATE_USER,
@@ -193,15 +244,21 @@ describe('user creation', () => {
       },
     });
 
+    const updatedUsers = await usersInDb();
+
     let error = '';
     if (res.errors) error = res.errors[0].message;
 
     expect(error).toMatch(/email required/);
     expect(res.data).toEqual({ createUser: null });
+    expect(originalUsers).toHaveLength(initialUsers.length);
+    expect(updatedUsers).toHaveLength(initialUsers.length);
   });
 
   it('new user with missing email cannot be created', async () => {
     const { mutate } = createTestClient(server);
+
+    const originalUsers = await usersInDb();
 
     const res = await mutate({
       mutation: Queries.CREATE_USER,
@@ -212,6 +269,8 @@ describe('user creation', () => {
       },
     });
 
+    const updatedUsers = await usersInDb();
+
     let error = '';
     if (res.errors) error = res.errors[0].message;
 
@@ -219,6 +278,8 @@ describe('user creation', () => {
       /Variable "\$email" of required type "String!" was not provided/
     );
     expect(res.data).not.toBeDefined();
+    expect(originalUsers).toHaveLength(initialUsers.length);
+    expect(updatedUsers).toHaveLength(initialUsers.length);
   });
 });
 
@@ -268,12 +329,16 @@ describe('user deletion', () => {
   it('user can delete own account', async () => {
     const { mutate } = createTestClientWithUser('user');
 
+    const originalUsers = await usersInDb();
+
     const res = await mutate({
       mutation: Queries.DELETE_USER,
       variables: {
         username: 'user',
       },
     });
+
+    const updatedUsers = await usersInDb();
 
     interface UserData {
       username: string;
@@ -285,10 +350,14 @@ describe('user deletion', () => {
         ? (res.data.deleteUser as UserData)
         : { username: '', fullname: '' };
     expect(userData.fullname).toBe('Normal User');
+    expect(originalUsers).toHaveLength(initialUsers.length);
+    expect(updatedUsers).toHaveLength(initialUsers.length - 1);
   });
 
   it('user cannot delete other account', async () => {
     const { mutate } = createTestClientWithUser('special');
+
+    const originalUsers = await usersInDb();
 
     const res = await mutate({
       mutation: Queries.DELETE_USER,
@@ -296,6 +365,8 @@ describe('user deletion', () => {
         username: 'user',
       },
     });
+
+    const updatedUsers = await usersInDb();
 
     interface UserData {
       username: string;
@@ -307,10 +378,14 @@ describe('user deletion', () => {
         ? (res.data.deleteUser as UserData)
         : { username: '', fullname: '' };
     expect(userData.fullname).not.toBe('Normal User');
+    expect(originalUsers).toHaveLength(initialUsers.length);
+    expect(updatedUsers).toHaveLength(initialUsers.length);
   });
 
   it('admin can delete any account', async () => {
     const { mutate } = createTestClientWithUser('admin');
+
+    const originalUsers = await usersInDb();
 
     const res = await mutate({
       mutation: Queries.DELETE_USER,
@@ -318,6 +393,8 @@ describe('user deletion', () => {
         username: 'user',
       },
     });
+
+    const updatedUsers = await usersInDb();
 
     interface UserData {
       username: string;
@@ -329,6 +406,8 @@ describe('user deletion', () => {
         ? (res.data.deleteUser as UserData)
         : { username: '', fullname: '' };
     expect(userData.fullname).toBe('Normal User');
+    expect(originalUsers).toHaveLength(initialUsers.length);
+    expect(updatedUsers).toHaveLength(initialUsers.length - 1);
   });
 });
 
@@ -363,7 +442,7 @@ describe('queries', () => {
 
     const usersData =
       res.data && res.data.listUsers ? (res.data.listUsers as UserData[]) : [];
-    expect(usersData).toHaveLength(3);
+    expect(usersData).toHaveLength(initialUsers.length);
   });
 
   it('finds user by username', async () => {

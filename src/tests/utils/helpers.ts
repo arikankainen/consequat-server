@@ -23,6 +23,11 @@ export const createTestClientWithUser = (user: string): ApolloServerTestClient =
   );
 };
 
+export const usersInDb = async (): Promise<User[]> => {
+  const users = await UserModel.find({});
+  return users;
+};
+
 export const photosInDb = async (): Promise<Photo[]> => {
   const photos = await PhotoModel.find({});
   return photos;
