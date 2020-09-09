@@ -55,7 +55,7 @@ export const photoResolver = {
 
       const user = await UserModel.findById(currentUser.id);
       if (user) {
-        user.albums = user.albums.concat(photo.id);
+        user.photos = user.photos.concat(photo.id);
         try {
           await user.save();
         } catch (error) {
