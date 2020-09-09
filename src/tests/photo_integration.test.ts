@@ -43,13 +43,13 @@ describe('photo addition', () => {
       name: '',
     };
 
-    const photoData: PhotoData =
+    const receivedPhoto: PhotoData =
       res.data && res.data.addPhoto ? (res.data.addPhoto as PhotoData) : emptyPhotoData;
 
-    expect(photoData.filename).toBe('filename_test.jpg');
-    expect(photoData.name).toBe('Photo name_test');
-    expect(originalPhotos).toHaveLength(5);
-    expect(updatedPhotos).toHaveLength(6);
+    expect(receivedPhoto.filename).toBe(testPhoto.filename);
+    expect(receivedPhoto.name).toBe(testPhoto.name);
+    expect(originalPhotos).toHaveLength(initialPhotos.length);
+    expect(updatedPhotos).toHaveLength(initialPhotos.length + 1);
   });
 });
 
@@ -68,8 +68,8 @@ describe('photo deletion', () => {
     const updatedPhotos = await photosInDb();
 
     expect(res.errors).toBe(undefined);
-    expect(originalPhotos).toHaveLength(5);
-    expect(updatedPhotos).toHaveLength(4);
+    expect(originalPhotos).toHaveLength(initialPhotos.length);
+    expect(updatedPhotos).toHaveLength(initialPhotos.length - 1);
   });
 
   it('user cannot delete other users photo', async () => {
@@ -88,8 +88,8 @@ describe('photo deletion', () => {
     if (res.errors) error = res.errors[0].message;
 
     expect(error).toMatch(/Not authenticated/);
-    expect(originalPhotos).toHaveLength(5);
-    expect(updatedPhotos).toHaveLength(5);
+    expect(originalPhotos).toHaveLength(initialPhotos.length);
+    expect(updatedPhotos).toHaveLength(initialPhotos.length);
   });
 
   it('admin can delete any photo', async () => {
@@ -106,8 +106,8 @@ describe('photo deletion', () => {
     const updatedPhotos = await photosInDb();
 
     expect(res.errors).toBe(undefined);
-    expect(originalPhotos).toHaveLength(5);
-    expect(updatedPhotos).toHaveLength(4);
+    expect(originalPhotos).toHaveLength(initialPhotos.length);
+    expect(updatedPhotos).toHaveLength(initialPhotos.length - 1);
   });
 });
 
@@ -132,12 +132,12 @@ describe('photo modification', () => {
     });
 
     const updatedPhotos = await photosInDb();
-    const updatedName = updatedPhotos[0].name;
+    const updatedPhoto = updatedPhotos[0];
 
     expect(res.errors).toBe(undefined);
-    expect(originalPhotos).toHaveLength(5);
-    expect(updatedPhotos).toHaveLength(5);
-    expect(updatedName).toBe('Updated name');
+    expect(originalPhotos).toHaveLength(initialPhotos.length);
+    expect(updatedPhotos).toHaveLength(initialPhotos.length);
+    expect(updatedPhoto.name).toBe(modifiedPhoto.name);
   });
 
   it('user can modify multiple own photos', async () => {
@@ -159,11 +159,11 @@ describe('photo modification', () => {
     const updatedPhotos = await photosInDb();
 
     expect(res.errors).toBe(undefined);
-    expect(originalPhotos).toHaveLength(5);
-    expect(updatedPhotos).toHaveLength(5);
+    expect(originalPhotos).toHaveLength(initialPhotos.length);
+    expect(updatedPhotos).toHaveLength(initialPhotos.length);
 
-    for (let i = 0; i < 5; i++) {
-      expect(updatedPhotos[i].name).toBe('Updated name');
+    for (let i = 0; i < initialPhotos.length; i++) {
+      expect(updatedPhotos[i].name).toBe(modifiedPhoto.name);
       expect(updatedPhotos[i].location).toBe(initialPhotos[i].location);
       expect(updatedPhotos[i].description).toBe(initialPhotos[i].description);
       expect(updatedPhotos[i].album).toBe(initialPhotos[i].album);
@@ -190,15 +190,15 @@ describe('photo modification', () => {
     });
 
     const updatedPhotos = await photosInDb();
-    const updatedName = updatedPhotos[0].name;
+    const updatedPhoto = updatedPhotos[0];
 
     let error = '';
     if (res.errors) error = res.errors[0].message;
 
     expect(error).toMatch(/Not authenticated/);
-    expect(originalPhotos).toHaveLength(5);
-    expect(updatedPhotos).toHaveLength(5);
-    expect(updatedName).not.toBe('Updated name');
+    expect(originalPhotos).toHaveLength(initialPhotos.length);
+    expect(updatedPhotos).toHaveLength(initialPhotos.length);
+    expect(updatedPhoto.name).not.toBe(modifiedPhoto.name);
   });
 
   it('admin can modify any photo', async () => {
@@ -221,12 +221,12 @@ describe('photo modification', () => {
     });
 
     const updatedPhotos = await photosInDb();
-    const updatedName = updatedPhotos[0].name;
+    const updatedPhoto = updatedPhotos[0];
 
     expect(res.errors).toBe(undefined);
-    expect(originalPhotos).toHaveLength(5);
-    expect(updatedPhotos).toHaveLength(5);
-    expect(updatedName).toBe('Updated name');
+    expect(originalPhotos).toHaveLength(initialPhotos.length);
+    expect(updatedPhotos).toHaveLength(initialPhotos.length);
+    expect(updatedPhoto.name).toBe(modifiedPhoto.name);
   });
 });
 
@@ -239,14 +239,12 @@ describe('queries', () => {
       filename: string;
     }
 
-    const photosData: PhotoData[] =
+    const receivedPhotos: PhotoData[] =
       res.data && res.data.listPhotos ? (res.data.listPhotos as PhotoData[]) : [];
 
-    expect(photosData).toHaveLength(5);
-    expect(photosData[0].filename).toBe('filename.jpg');
-    expect(photosData[1].filename).toBe('filename2.jpg');
-    expect(photosData[2].filename).toBe('filename3.jpg');
-    expect(photosData[3].filename).toBe('filename4.jpg');
-    expect(photosData[4].filename).toBe('filename5.jpg');
+    for (let i = 0; i < initialPhotos.length; i++) {
+      expect(receivedPhotos[i].filename).toBe(initialPhotos[i].filename);
+    }
+    expect(receivedPhotos).toHaveLength(initialPhotos.length);
   });
 });

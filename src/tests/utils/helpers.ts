@@ -58,7 +58,7 @@ export const prepareInitialPhotos = async (): Promise<void> => {
       initialPhotos.map((photo) => {
         photo = { ...photo, user: user.id };
         const createdPhoto = new PhotoModel(photo);
-        user.albums = user.albums.concat(createdPhoto.id);
+        user.photos = user.photos.concat(createdPhoto.id);
         return createdPhoto;
       })
     );

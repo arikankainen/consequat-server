@@ -213,9 +213,7 @@ describe('queries', () => {
     const albumData: AlbumData[] =
       res.data && res.data.listAlbums ? (res.data.listAlbums as AlbumData[]) : [];
 
-    for (let i = 0; i < 3; i++) {
-      expect(albumData[i].name).toBe(initialAlbums[i].name);
-      expect(albumData[i].name).toBe(initialAlbums[i].name);
+    for (let i = 0; i < initialAlbums.length; i++) {
       expect(albumData[i].name).toBe(initialAlbums[i].name);
     }
     expect(albumData).toHaveLength(initialAlbums.length);
