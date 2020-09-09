@@ -1,6 +1,6 @@
 import { createTestClient } from 'apollo-server-testing';
 import { server, mongoose } from '..';
-import { photosInDb } from './utils/helpers';
+import { photosInDb, prepareInitialAlbums, preparePhotosToAlbums } from './utils/helpers';
 import Queries from './utils/photoQueries';
 import { testPhoto } from './utils/testData';
 import { initialPhotos } from './utils/initialData';
@@ -14,6 +14,8 @@ import {
 beforeEach(async () => {
   await prepareInitialUsers();
   await prepareInitialPhotos();
+  await prepareInitialAlbums();
+  await preparePhotosToAlbums();
 });
 
 afterAll(async () => {

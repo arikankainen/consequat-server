@@ -92,3 +92,26 @@ export const prepareInitialAlbums = async (): Promise<void> => {
     await AlbumModel.insertMany(albumObjects);
   }
 };
+
+export const preparePhotosToAlbums = async (): Promise<void> => {
+  const photos = await photosInDb();
+  const albums = await albumsInDb();
+
+  albums[0].photos = [photos[0].id, photos[1].id];
+  albums[1].photos = [photos[2].id, photos[3].id];
+  albums[2].photos = [photos[4].id];
+
+  photos[0].album = albums[0].id;
+  photos[1].album = albums[0].id;
+  photos[2].album = albums[1].id;
+  photos[3].album = albums[1].id;
+  photos[4].album = albums[2].id;
+
+  for (let i = 0; i < albums.length; i++) {
+    await albums[i].save();
+  }
+
+  for (let i = 0; i < photos.length; i++) {
+    await photos[i].save();
+  }
+};
