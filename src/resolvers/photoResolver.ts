@@ -100,10 +100,12 @@ export const photoResolver = {
         throw new AuthenticationError('Not authenticated');
       }
       const photo = await PhotoModel.findByIdAndDelete(args.id);
-      await UserModel.findByIdAndUpdate(
-        { _id: currentUser.id },
-        { $pullAll: { photos: [id] } }
-      );
+      if (photo && photo.user) {
+        await UserModel.findByIdAndUpdate(
+          { _id: photo.user },
+          { $pullAll: { photos: [id] } }
+        );
+      }
 
       if (photo && photo.album) {
         await AlbumModel.findByIdAndUpdate(
