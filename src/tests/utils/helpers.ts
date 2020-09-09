@@ -45,6 +45,20 @@ export const photosInAlbum = async (id: string | null): Promise<string[]> => {
   return album.photos.map((photo) => String(photo));
 };
 
+export const photosInUser = async (username: string | null): Promise<string[]> => {
+  if (!username) return [];
+  const user = await UserModel.findOne({ username });
+  if (!user) return [];
+  return user.photos.map((photo) => String(photo));
+};
+
+export const albumsInUser = async (username: string | null): Promise<string[]> => {
+  if (!username) return [];
+  const user = await UserModel.findOne({ username });
+  if (!user) return [];
+  return user.albums.map((album) => String(album));
+};
+
 export const prepareInitialUsers = async (): Promise<void> => {
   await UserModel.deleteMany({});
 

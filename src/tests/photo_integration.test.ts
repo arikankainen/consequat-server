@@ -1,15 +1,17 @@
 import { createTestClient } from 'apollo-server-testing';
 import { server, mongoose } from '..';
+import Queries from './utils/photoQueries';
+import { testPhoto } from './utils/testData';
+import { initialPhotos } from './utils/initialData';
+
 import {
   photosInDb,
   prepareInitialAlbums,
   preparePhotosToAlbums,
   photosInAlbum,
   albumsInDb,
+  photosInUser,
 } from './utils/helpers';
-import Queries from './utils/photoQueries';
-import { testPhoto } from './utils/testData';
-import { initialPhotos } from './utils/initialData';
 
 import {
   createTestClientWithUser,
@@ -33,6 +35,7 @@ describe('photo addition', () => {
     const { mutate } = createTestClientWithUser('user');
 
     const originalPhotos = await photosInDb();
+    const originalPhotosInUser = await photosInUser('user');
 
     const res = await mutate({
       mutation: Queries.ADD_PHOTO,
@@ -40,6 +43,7 @@ describe('photo addition', () => {
     });
 
     const updatedPhotos = await photosInDb();
+    const updatedPhotosInUser = await photosInUser('user');
 
     interface PhotoData {
       filename: string;
@@ -58,6 +62,7 @@ describe('photo addition', () => {
     expect(receivedPhoto.name).toBe(testPhoto.name);
     expect(originalPhotos).toHaveLength(initialPhotos.length);
     expect(updatedPhotos).toHaveLength(initialPhotos.length + 1);
+    expect(updatedPhotosInUser).toHaveLength(originalPhotosInUser.length + 1);
   });
 });
 
@@ -66,6 +71,7 @@ describe('photo deletion', () => {
     const { mutate } = createTestClientWithUser('user');
 
     const originalPhotos = await photosInDb();
+    const originalPhotosInUser = await photosInUser('user');
 
     const photoToDelete = originalPhotos[0];
     const photoId = photoToDelete.id;
@@ -78,6 +84,7 @@ describe('photo deletion', () => {
       variables: { id: photoId },
     });
 
+    const updatedPhotosInUser = await photosInUser('user');
     const updatedPhotos = await photosInDb();
     const updatedPhotosInAlbum = await photosInAlbum(albumId);
 
@@ -88,6 +95,7 @@ describe('photo deletion', () => {
     expect(originalPhotosInAlbum).toContain(photoId);
     expect(updatedPhotosInAlbum).not.toContain(photoId);
     expect(updatedPhotosInAlbum).toHaveLength(originalPhotosInAlbum.length - 1);
+    expect(updatedPhotosInUser).toHaveLength(originalPhotosInUser.length - 1);
   });
 
   it('user cannot delete other users photo', async () => {
@@ -115,6 +123,7 @@ describe('photo deletion', () => {
     const { mutate } = createTestClientWithUser('admin');
 
     const originalPhotos = await photosInDb();
+    const originalPhotosInUser = await photosInUser('user');
 
     const photoToDelete = originalPhotos[0];
     const photoId = photoToDelete.id;
@@ -127,6 +136,7 @@ describe('photo deletion', () => {
       variables: { id: photoId },
     });
 
+    const updatedPhotosInUser = await photosInUser('user');
     const updatedPhotos = await photosInDb();
     const updatedPhotosInAlbum = await photosInAlbum(albumId);
 
@@ -137,6 +147,7 @@ describe('photo deletion', () => {
     expect(originalPhotosInAlbum).toContain(photoId);
     expect(updatedPhotosInAlbum).not.toContain(photoId);
     expect(updatedPhotosInAlbum).toHaveLength(originalPhotosInAlbum.length - 1);
+    expect(updatedPhotosInUser).toHaveLength(originalPhotosInUser.length - 1);
   });
 });
 
