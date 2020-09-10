@@ -16,6 +16,7 @@ interface Photo2 {
   name?: string;
   location?: string;
   description?: string;
+  tags?: string[];
   dateAdded?: string;
   album?: string;
   id: string[];
@@ -49,6 +50,7 @@ export const photoResolver = {
         name: args.name || '',
         location: args.location || '',
         description: args.description || '',
+        tags: args.tags || [],
         album: args.album || null,
         user: currentUser.id,
       });
@@ -154,6 +156,7 @@ export const photoResolver = {
         photo.location = args.location ? args.location : '';
         photo.album = args.album ? args.album : null;
         photo.description = args.description ? args.description : '';
+        photo.tags = args.tags ? args.tags : [];
 
         try {
           await photo.save();

@@ -167,6 +167,7 @@ describe('photo modification', () => {
       name: 'Updated name',
       location: 'Updated location',
       description: 'Updated description',
+      tags: ['updated', 'another_updated', 'yet_another'],
       album: newAlbumId,
     };
 
@@ -187,6 +188,7 @@ describe('photo modification', () => {
     expect(updatedPhotos).toHaveLength(initialPhotos.length);
 
     expect(updatedPhoto.name).toBe(modifiedPhoto.name);
+    expect(Array.from(updatedPhoto.tags)).toEqual(modifiedPhoto.tags);
     expect(updatedPhoto.location).toBe(modifiedPhoto.location);
     expect(updatedPhoto.description).toBe(modifiedPhoto.description);
     expect(String(updatedPhoto.album)).toBe(modifiedPhoto.album);
@@ -221,6 +223,7 @@ describe('photo modification', () => {
       expect(updatedPhotos[i].name).toBe(modifiedPhoto.name);
       expect(updatedPhotos[i].location).toBe(initialPhotos[i].location);
       expect(updatedPhotos[i].description).toBe(initialPhotos[i].description);
+      expect(Array.from(updatedPhotos[i].tags)).toEqual(initialPhotos[i].tags);
     }
   });
 
