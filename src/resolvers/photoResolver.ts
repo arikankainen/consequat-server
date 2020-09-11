@@ -13,6 +13,8 @@ interface Photo2 {
   filename?: string;
   thumbFilename?: string;
   originalFilename?: string;
+  width?: number;
+  height?: number;
   name?: string;
   location?: string;
   description?: string;
@@ -47,6 +49,8 @@ export const photoResolver = {
         filename: args.filename,
         thumbFilename: args.thumbFilename,
         originalFilename: args.originalFilename,
+        width: args.width,
+        height: args.height,
         name: args.name || '',
         location: args.location || '',
         description: args.description || '',
