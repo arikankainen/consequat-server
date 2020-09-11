@@ -54,7 +54,6 @@ describe('photo addition', () => {
       filename: '',
       name: '',
     };
-
     const receivedPhoto: PhotoData =
       res.data && res.data.addPhoto ? (res.data.addPhoto as PhotoData) : emptyPhotoData;
 
