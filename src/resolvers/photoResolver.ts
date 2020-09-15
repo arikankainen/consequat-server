@@ -24,10 +24,30 @@ interface Photo2 {
   id: string[];
 }
 
+interface ListPhotosArgs {
+  search?: string;
+}
+
 export const photoResolver = {
   Query: {
-    listPhotos: async (): Promise<Photo[]> => {
-      return await PhotoModel.find({}).populate('user').populate('album');
+    listPhotos: async (_root: undefined, args: ListPhotosArgs): Promise<Photo[]> => {
+      if (!args.search) {
+        return await PhotoModel.find({}).populate('user').populate('album');
+      }
+
+      const search = args.search;
+      const allPhotos = await PhotoModel.find({
+        $or: [
+          { name: { $regex: search, $options: 'i' } },
+          { location: { $regex: search, $options: 'i' } },
+          { description: { $regex: search, $options: 'i' } },
+          { tags: { $regex: search, $options: 'i' } },
+        ],
+      })
+        .populate('user')
+        .populate('album');
+
+      return allPhotos;
     },
   },
 
