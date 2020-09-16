@@ -7,7 +7,7 @@ import { isError } from '../utils/typeguards';
 import mongoose from 'mongoose';
 import logger from '../utils/logger';
 
-interface Photo2 {
+interface EditPhotosArgs {
   mainUrl?: string;
   thumbUrl?: string;
   filename?: string;
@@ -25,7 +25,7 @@ interface Photo2 {
 }
 
 interface ListPhotosArgs {
-  type?: 'all' | 'name' | 'location' | 'description' | 'tags';
+  type?: string[];
   keyword?: string;
 }
 
@@ -35,33 +35,57 @@ export const photoResolver = {
       const type = args.type;
       const keyword = args.keyword;
 
-      if (!keyword) {
-        return await PhotoModel.find({}).populate('user').populate('album');
+      interface SearchOptions {
+        $regex: string;
+        $options: string;
       }
 
-      if (
-        type === 'name' ||
-        type === 'location' ||
-        type === 'description' ||
-        type === 'tags'
-      ) {
-        return await PhotoModel.find({
-          $or: [{ [type]: { $regex: keyword, $options: 'i' } }],
-        })
-          .populate('user')
-          .populate('album');
+      interface SearchCondition {
+        name?: SearchOptions;
+        location?: SearchOptions;
+        description?: SearchOptions;
+        tags?: SearchOptions;
       }
 
-      return await PhotoModel.find({
-        $or: [
-          { name: { $regex: keyword, $options: 'i' } },
-          { location: { $regex: keyword, $options: 'i' } },
-          { description: { $regex: keyword, $options: 'i' } },
-          { tags: { $regex: keyword, $options: 'i' } },
-        ],
-      })
-        .populate('user')
-        .populate('album');
+      interface SearchQuery {
+        $or?: SearchCondition[];
+      }
+
+      let searchQuery: SearchQuery = {};
+
+      if (keyword && type && type.length > 0) {
+        const searchOptions = { $regex: keyword, $options: 'i' };
+        const searchArray: SearchCondition[] = [];
+
+        if (type.includes('name')) {
+          searchArray.push({ name: searchOptions });
+        }
+        if (type.includes('location')) {
+          searchArray.push({ location: searchOptions });
+        }
+        if (type.includes('description')) {
+          searchArray.push({ description: searchOptions });
+        }
+        if (type.includes('tags')) {
+          searchArray.push({ tags: searchOptions });
+        }
+
+        searchQuery = { $or: searchArray };
+      }
+
+      console.log(searchQuery);
+      return await PhotoModel.find(searchQuery).populate('user').populate('album');
+
+      // return await PhotoModel.find({
+      //   $or: [
+      //     { name: { $regex: keyword, $options: 'i' } },
+      //     { location: { $regex: keyword, $options: 'i' } },
+      //     { description: { $regex: keyword, $options: 'i' } },
+      //     { tags: { $regex: keyword, $options: 'i' } },
+      //   ],
+      // })
+      //   .populate('user')
+      //   .populate('album');
     },
   },
 
@@ -209,7 +233,7 @@ export const photoResolver = {
 
     editPhotos: async (
       _root: undefined,
-      args: Photo2,
+      args: EditPhotosArgs,
       context: UserInContext
     ): Promise<Photo[] | null> => {
       const currentUser = context.currentUser;
