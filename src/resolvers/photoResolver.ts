@@ -24,8 +24,10 @@ interface EditPhotosArgs {
   id: string[];
 }
 
+type TypeSelector = 'name' | 'location' | 'description' | 'tags';
+
 interface ListPhotosArgs {
-  type?: string[];
+  type?: TypeSelector[];
   keyword?: string;
 }
 
