@@ -25,29 +25,43 @@ interface Photo2 {
 }
 
 interface ListPhotosArgs {
-  search?: string;
+  type?: 'all' | 'name' | 'location' | 'description' | 'tags';
+  keyword?: string;
 }
 
 export const photoResolver = {
   Query: {
     listPhotos: async (_root: undefined, args: ListPhotosArgs): Promise<Photo[]> => {
-      if (!args.search) {
+      const type = args.type;
+      const keyword = args.keyword;
+
+      if (!keyword) {
         return await PhotoModel.find({}).populate('user').populate('album');
       }
 
-      const search = args.search;
-      const allPhotos = await PhotoModel.find({
+      if (
+        type === 'name' ||
+        type === 'location' ||
+        type === 'description' ||
+        type === 'tags'
+      ) {
+        return await PhotoModel.find({
+          $or: [{ [type]: { $regex: keyword, $options: 'i' } }],
+        })
+          .populate('user')
+          .populate('album');
+      }
+
+      return await PhotoModel.find({
         $or: [
-          { name: { $regex: search, $options: 'i' } },
-          { location: { $regex: search, $options: 'i' } },
-          { description: { $regex: search, $options: 'i' } },
-          { tags: { $regex: search, $options: 'i' } },
+          { name: { $regex: keyword, $options: 'i' } },
+          { location: { $regex: keyword, $options: 'i' } },
+          { description: { $regex: keyword, $options: 'i' } },
+          { tags: { $regex: keyword, $options: 'i' } },
         ],
       })
         .populate('user')
         .populate('album');
-
-      return allPhotos;
     },
   },
 
