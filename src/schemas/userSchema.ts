@@ -30,6 +30,13 @@ export const userSchema = gql`
       fullname: String!
     ): User
 
+    editUser(
+      id: ID!
+      email: String
+      oldPassword: String
+      newPassword: String
+    ): User
+
     deleteUser(
       username: String!
     ): User

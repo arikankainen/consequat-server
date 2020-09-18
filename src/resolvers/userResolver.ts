@@ -9,6 +9,39 @@ import { UserInContext } from '../utils/types';
 import { isError } from '../utils/typeguards';
 import Logger from '../utils/logger';
 
+interface EditUser {
+  id: string;
+  email?: string;
+  oldPassword?: string;
+  newPassword?: string;
+}
+
+const createUserValidation = Yup.object().shape({
+  username: Yup.string()
+    .min(3, 'username must be at least 3 characters')
+    .required('username required'),
+  email: Yup.string().email('email must be valid e-mail').required('email required'),
+  fullname: Yup.string().required('full name required'),
+  password: Yup.string()
+    .min(5, 'password must be at least 5 characters')
+    .required('password required'),
+});
+
+const emailChangeValidation = Yup.object().shape({
+  email: Yup.string().email('email must be valid e-mail').required('email required'),
+});
+
+const passwordChangeValidation = Yup.object().shape({
+  oldPassword: Yup.string()
+    .min(5, 'password must be at least 5 characters')
+    .required('password required'),
+  newPassword: Yup.string()
+    .min(5, 'password must be at least 5 characters')
+    .required('password required'),
+});
+
+const saltRounds = 10;
+
 export const userResolver = {
   Query: {
     listUsers: async (): Promise<User[]> => {
@@ -47,24 +80,10 @@ export const userResolver = {
 
   Mutation: {
     createUser: async (_root: undefined, args: User): Promise<User> => {
-      const saltRounds = 10;
       const passwordHash = await bcrypt.hash(args.password, saltRounds);
 
-      const validation = Yup.object().shape({
-        username: Yup.string()
-          .min(3, 'username must be at least 3 characters')
-          .required('username required'),
-        email: Yup.string()
-          .email('email must be valid e-mail')
-          .required('email required'),
-        fullname: Yup.string().required('full name required'),
-        password: Yup.string()
-          .min(5, 'password must be at least 5 characters')
-          .required('password required'),
-      });
-
       try {
-        await validation.validate(args);
+        await createUserValidation.validate(args);
       } catch (error) {
         const message = isError(error) ? error.message : '';
         throw new UserInputError(message, { invalidArgs: args });
@@ -88,6 +107,77 @@ export const userResolver = {
       return user;
     },
 
+    editUser: async (
+      _root: undefined,
+      args: EditUser,
+      context: UserInContext
+    ): Promise<User | null> => {
+      if (context.currentUser.id !== args.id) {
+        throw new AuthenticationError('Not authenticated');
+      }
+
+      let updatedEmail;
+      let updatedPassword;
+
+      if (args.email) {
+        try {
+          await emailChangeValidation.validate(args);
+        } catch (error) {
+          const message = isError(error) ? error.message : '';
+          throw new UserInputError(message, { invalidArgs: args });
+        }
+
+        updatedEmail = args.email;
+      }
+
+      if (args.oldPassword && args.newPassword) {
+        try {
+          await passwordChangeValidation.validate(args);
+        } catch (error) {
+          const message = isError(error) ? error.message : '';
+          throw new UserInputError(message, { invalidArgs: args });
+        }
+
+        try {
+          const user = await UserModel.findById(args.id);
+
+          const passwordCorrect =
+            user === null ? false : await bcrypt.compare(args.oldPassword, user.password);
+
+          if (!passwordCorrect) {
+            throw new UserInputError('Wrong password');
+          }
+
+          updatedPassword = await bcrypt.hash(args.newPassword, saltRounds);
+        } catch (error) {
+          const message = isError(error) ? error.message : '';
+          throw new Error(message);
+        }
+      }
+
+      interface UpdatedObject {
+        email?: string;
+        password?: string;
+      }
+
+      const updatedObject: UpdatedObject = {};
+
+      if (updatedPassword) updatedObject.password = updatedPassword;
+      if (updatedEmail) updatedObject.email = updatedEmail;
+
+      try {
+        const user = await UserModel.findByIdAndUpdate(
+          { _id: args.id },
+          { $set: updatedObject },
+          { new: true }
+        );
+        return user;
+      } catch (error) {
+        const message = isError(error) ? error.message : '';
+        throw new Error(message);
+      }
+    },
+
     deleteUser: async (
       _root: undefined,
       args: { username: string },
@@ -95,7 +185,7 @@ export const userResolver = {
     ): Promise<User | null> => {
       const user = await UserModel.findOne({ username: args.username });
 
-      if (context.currentUser.isAdmin || (user && context.currentUser.id == user.id)) {
+      if (context.currentUser.isAdmin || (user && context.currentUser.id === user.id)) {
         try {
           await UserModel.findByIdAndRemove(user?.id);
         } catch (error) {
