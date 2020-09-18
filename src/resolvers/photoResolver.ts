@@ -21,7 +21,7 @@ interface EditPhotosArgs {
   tags?: string[];
   dateAdded?: string;
   album?: string;
-  id: string[];
+  id?: string[];
 }
 
 type TypeSelector = 'name' | 'location' | 'description' | 'tags';
@@ -240,6 +240,7 @@ export const photoResolver = {
     ): Promise<Photo[] | null> => {
       const currentUser = context.currentUser;
       const id = args.id;
+      if (!id) return null;
 
       const isOwnPhoto = id.every((value) => currentUser.photos.includes(value));
 
