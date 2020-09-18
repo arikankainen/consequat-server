@@ -10,7 +10,6 @@ import { isError } from '../utils/typeguards';
 import Logger from '../utils/logger';
 
 interface EditUser {
-  id: string;
   email?: string;
   oldPassword?: string;
   newPassword?: string;
@@ -20,7 +19,9 @@ const createUserValidation = Yup.object().shape({
   username: Yup.string()
     .min(3, 'username must be at least 3 characters')
     .required('username required'),
-  email: Yup.string().email('email must be valid e-mail').required('email required'),
+  email: Yup.string()
+    .email('email must be valid e-mail')
+    .required('email required'),
   fullname: Yup.string().required('full name required'),
   password: Yup.string()
     .min(5, 'password must be at least 5 characters')
@@ -28,7 +29,9 @@ const createUserValidation = Yup.object().shape({
 });
 
 const emailChangeValidation = Yup.object().shape({
-  email: Yup.string().email('email must be valid e-mail').required('email required'),
+  email: Yup.string()
+    .email('email must be valid e-mail')
+    .required('email required'),
 });
 
 const passwordChangeValidation = Yup.object().shape({
@@ -112,7 +115,9 @@ export const userResolver = {
       args: EditUser,
       context: UserInContext
     ): Promise<User | null> => {
-      if (context.currentUser.id !== args.id) {
+      const id = context.currentUser.id;
+
+      if (!id) {
         throw new AuthenticationError('Not authenticated');
       }
 
@@ -139,10 +144,12 @@ export const userResolver = {
         }
 
         try {
-          const user = await UserModel.findById(args.id);
+          const user = await UserModel.findById(id);
 
           const passwordCorrect =
-            user === null ? false : await bcrypt.compare(args.oldPassword, user.password);
+            user === null
+              ? false
+              : await bcrypt.compare(args.oldPassword, user.password);
 
           if (!passwordCorrect) {
             throw new UserInputError('Wrong password');
@@ -167,10 +174,11 @@ export const userResolver = {
 
       try {
         const user = await UserModel.findByIdAndUpdate(
-          { _id: args.id },
+          { _id: id },
           { $set: updatedObject },
           { new: true }
         );
+
         return user;
       } catch (error) {
         const message = isError(error) ? error.message : '';
@@ -185,7 +193,10 @@ export const userResolver = {
     ): Promise<User | null> => {
       const user = await UserModel.findOne({ username: args.username });
 
-      if (context.currentUser.isAdmin || (user && context.currentUser.id === user.id)) {
+      if (
+        context.currentUser.isAdmin ||
+        (user && context.currentUser.id === user.id)
+      ) {
         try {
           await UserModel.findByIdAndRemove(user?.id);
         } catch (error) {
@@ -205,7 +216,9 @@ export const userResolver = {
     ): Promise<{ token: string }> => {
       const user = await UserModel.findOne({ username: args.username });
       const passwordCorrect =
-        user === null ? false : await bcrypt.compare(args.password, user.password);
+        user === null
+          ? false
+          : await bcrypt.compare(args.password, user.password);
 
       if (!(user && passwordCorrect)) {
         throw new UserInputError('Wrong credentials');

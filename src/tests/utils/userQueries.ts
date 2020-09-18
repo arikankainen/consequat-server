@@ -28,9 +28,8 @@ const CREATE_USER = gql`
 `;
 
 const EDIT_USER = gql`
-  mutation editUser($id: ID!, $oldPassword: String, $newPassword: String, $email: String) {
+  mutation editUser($oldPassword: String, $newPassword: String, $email: String) {
     editUser(
-      id: $id,
       oldPassword: $oldPassword,
       newPassword: $newPassword,
       email: $email,
