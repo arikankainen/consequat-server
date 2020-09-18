@@ -4,6 +4,7 @@ import { createTestClientWithUser } from './utils/helpers';
 import Queries from './utils/userQueries';
 import { prepareInitialUsers, usersInDb } from './utils/helpers';
 import { initialUsers } from './utils/initialData';
+import { User } from '../models/user';
 
 beforeEach(async () => {
   await prepareInitialUsers();
@@ -300,7 +301,9 @@ describe('login', () => {
     }
 
     const loginData =
-      res.data && res.data.login ? (res.data.login as LoginData) : { token: '' };
+      res.data && res.data.login
+        ? (res.data.login as LoginData)
+        : { token: '' };
     expect(loginData.token).toHaveLength(173);
   });
 
@@ -320,8 +323,102 @@ describe('login', () => {
     }
 
     const loginData =
-      res.data && res.data.login ? (res.data.login as LoginData) : { token: '' };
+      res.data && res.data.login
+        ? (res.data.login as LoginData)
+        : { token: '' };
     expect(loginData.token).toHaveLength(0);
+  });
+});
+
+describe('user modify', () => {
+  it('user can modify own email', async () => {
+    const { mutate, query } = createTestClientWithUser('user');
+
+    const queryRes = await query({ query: Queries.ME });
+    const queriedUser =
+      queryRes.data && queryRes.data.me
+        ? (queryRes.data.me as User)
+        : undefined;
+
+    if (!queriedUser || !queriedUser.id) throw new Error('user not found');
+
+    const mutateRes = await mutate({
+      mutation: Queries.EDIT_USER,
+      variables: {
+        id: queriedUser.id,
+        email: 'new@mail.com',
+      },
+    });
+    const mutatedUser =
+      mutateRes.data && mutateRes.data.editUser
+        ? (mutateRes.data.editUser as User)
+        : undefined;
+
+    const updatedUsers = await usersInDb();
+    const updatedUser = updatedUsers[1];
+
+    expect(mutatedUser).toBeDefined();
+    expect(queryRes.errors).toBe(undefined);
+    expect(mutateRes.errors).toBe(undefined);
+    expect(updatedUser.email).toBe('new@mail.com');
+  });
+
+  it('user can modify own password if old password is correct', async () => {
+    const { mutate, query } = createTestClientWithUser('user');
+
+    const queryRes = await query({ query: Queries.ME });
+    const queriedUser =
+      queryRes.data && queryRes.data.me
+        ? (queryRes.data.me as User)
+        : undefined;
+
+    if (!queriedUser || !queriedUser.id) throw new Error('user not found');
+
+    const mutateRes = await mutate({
+      mutation: Queries.EDIT_USER,
+      variables: {
+        id: queriedUser.id,
+        oldPassword: '00000',
+        newPassword: '11111',
+      },
+    });
+    const mutatedUser =
+      mutateRes.data && mutateRes.data.editUser
+        ? (mutateRes.data.editUser as User)
+        : undefined;
+
+    expect(mutatedUser).toBeDefined();
+    expect(queryRes.errors).toBe(undefined);
+    expect(mutateRes.errors).toBe(undefined);
+  });
+
+  it('user cannot modify own password if old password is incorrect', async () => {
+    const { mutate, query } = createTestClientWithUser('user');
+
+    const queryRes = await query({ query: Queries.ME });
+    const queriedUser =
+      queryRes.data && queryRes.data.me
+        ? (queryRes.data.me as User)
+        : undefined;
+
+    if (!queriedUser || !queriedUser.id) throw new Error('user not found');
+
+    const mutateRes = await mutate({
+      mutation: Queries.EDIT_USER,
+      variables: {
+        id: queriedUser.id,
+        oldPassword: '00001',
+        newPassword: '11111',
+      },
+    });
+    const mutatedUser =
+      mutateRes.data && mutateRes.data.editUser
+        ? (mutateRes.data.editUser as User)
+        : undefined;
+
+    expect(mutatedUser).toBe(undefined);
+    expect(queryRes.errors).toBe(undefined);
+    expect(mutateRes.errors).toBeDefined();
   });
 });
 
@@ -423,7 +520,9 @@ describe('own info', () => {
     }
 
     const userData =
-      res.data && res.data.me ? (res.data.me as UserData) : { fullname: '', id: '' };
+      res.data && res.data.me
+        ? (res.data.me as UserData)
+        : { fullname: '', id: '' };
     expect(userData.fullname).toBe('Normal User');
   });
 });

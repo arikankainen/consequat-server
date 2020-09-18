@@ -10,7 +10,7 @@
   "proseWrap": "preserve",
   "jsxSingleQuote": false,
   "singleQuote": true,
-  "printWidth": 90,
+  "printWidth": 80,
   "htmlWhitespaceSensitivity": "css",
   "endOfLine": "lf",
   "embeddedLanguageFormatting": "off"

@@ -75,7 +75,6 @@ export const photoResolver = {
         searchQuery = { $or: searchArray };
       }
 
-      console.log(searchQuery);
       return await PhotoModel.find(searchQuery).populate('user').populate('album');
 
       // return await PhotoModel.find({

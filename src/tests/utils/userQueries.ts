@@ -27,6 +27,20 @@ const CREATE_USER = gql`
   }
 `;
 
+const EDIT_USER = gql`
+  mutation editUser($id: ID!, $oldPassword: String, $newPassword: String, $email: String) {
+    editUser(
+      id: $id,
+      oldPassword: $oldPassword,
+      newPassword: $newPassword,
+      email: $email,
+    ) {
+      password,
+      email,
+    }
+  }
+`;
+
 const DELETE_USER = gql`
   mutation deleteUser($username: String!) {
     deleteUser(
@@ -64,7 +78,8 @@ const ME = gql`
   query me {
     me {
       id,
-      fullname
+      fullname,
+      password,
     }
   }
 `;
@@ -72,6 +87,7 @@ const ME = gql`
 export default {
   LOGIN,
   CREATE_USER,
+  EDIT_USER,
   DELETE_USER,
   LIST_USERS,
   GET_USER,
