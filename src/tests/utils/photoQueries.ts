@@ -11,6 +11,7 @@ const LIST_PHOTOS = gql`
       name,
       location,
       description,
+      hidden,
       tags,
       id,
     }
@@ -29,6 +30,7 @@ const ADD_PHOTO = gql`
     $name: String!,
     $location: String,
     $description: String,
+    $hidden: Boolean,
     $tags: [String],
   ) {
     addPhoto(
@@ -42,6 +44,7 @@ const ADD_PHOTO = gql`
       name: $name,
       location: $location,
       description: $description,
+      hidden: $hidden,
       tags: $tags,
     ) {
       filename,
@@ -74,6 +77,7 @@ const EDIT_PHOTO = gql`
     $name: String!,
     $location: String,
     $description: String,
+    $hidden: Boolean,
     $tags: [String],
     $album: String,
   ) {
@@ -82,6 +86,7 @@ const EDIT_PHOTO = gql`
       name: $name,
       location: $location,
       description: $description,
+      hidden: $hidden,
       tags: $tags,
       album: $album,
     ) {
@@ -100,6 +105,7 @@ const EDIT_PHOTOS = gql`
     $name: String,
     $location: String,
     $description: String,
+    $hidden: Boolean,
     $tags: [String],
     $album: String,
   ) {
@@ -108,6 +114,7 @@ const EDIT_PHOTOS = gql`
       name: $name,
       location: $location,
       description: $description,
+      hidden: $hidden,
       tags: $tags,
       album: $album,
     ) {
