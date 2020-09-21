@@ -13,6 +13,7 @@ export const photoSchema = gql`
     location: String
     description: String
     dateAdded: String
+    hidden: Boolean
     tags: [String]
     user: User!
     album: Album
@@ -35,6 +36,7 @@ export const photoSchema = gql`
       name: String
       location: String
       description: String
+      hidden: Boolean
       tags: [String]
       album: String
     ): Photo
@@ -47,6 +49,7 @@ export const photoSchema = gql`
       name: String!
       location: String
       description: String
+      hidden: Boolean
       tags: [String]
       album: String
       id: ID!
@@ -56,6 +59,7 @@ export const photoSchema = gql`
       name: String
       location: String
       description: String
+      hidden: Boolean
       tags: [String]
       album: String
       id: [ID!]!

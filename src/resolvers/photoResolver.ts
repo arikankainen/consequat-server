@@ -18,6 +18,7 @@ interface EditPhotosArgs {
   name?: string;
   location?: string;
   description?: string;
+  hidden?: boolean;
   tags?: string[];
   dateAdded?: string;
   album?: string;
@@ -33,7 +34,10 @@ interface ListPhotosArgs {
 
 export const photoResolver = {
   Query: {
-    listPhotos: async (_root: undefined, args: ListPhotosArgs): Promise<Photo[]> => {
+    listPhotos: async (
+      _root: undefined,
+      args: ListPhotosArgs
+    ): Promise<Photo[]> => {
       const type = args.type;
       const keyword = args.keyword;
 
@@ -75,14 +79,23 @@ export const photoResolver = {
         searchQuery = { $or: searchArray };
       }
 
-      return await PhotoModel.find(searchQuery).populate('user').populate('album');
+      return await PhotoModel.find({
+        $and: [searchQuery, { hidden: false }],
+      })
+        .populate('user')
+        .populate('album');
 
       // return await PhotoModel.find({
-      //   $or: [
-      //     { name: { $regex: keyword, $options: 'i' } },
-      //     { location: { $regex: keyword, $options: 'i' } },
-      //     { description: { $regex: keyword, $options: 'i' } },
-      //     { tags: { $regex: keyword, $options: 'i' } },
+      //   $and: [
+      //     {
+      //       $or: [
+      //         { name: { $regex: keyword, $options: 'i' } },
+      //         { location: { $regex: keyword, $options: 'i' } },
+      //         { description: { $regex: keyword, $options: 'i' } },
+      //         { tags: { $regex: keyword, $options: 'i' } },
+      //       ],
+      //     },
+      //     { hidden: false },
       //   ],
       // })
       //   .populate('user')
@@ -113,6 +126,7 @@ export const photoResolver = {
         name: args.name || '',
         location: args.location || '',
         description: args.description || '',
+        hidden: args.hidden || true,
         tags: args.tags || [],
         album: args.album || null,
         user: currentUser.id,
@@ -219,6 +233,7 @@ export const photoResolver = {
         photo.location = args.location ? args.location : '';
         photo.album = args.album ? args.album : null;
         photo.description = args.description ? args.description : '';
+        photo.hidden = args.hidden ? args.hidden : true;
         photo.tags = args.tags ? args.tags : [];
 
         try {
@@ -241,7 +256,9 @@ export const photoResolver = {
       const id = args.id;
       if (!id) return null;
 
-      const isOwnPhoto = id.every((value) => currentUser.photos.includes(value));
+      const isOwnPhoto = id.every((value) =>
+        currentUser.photos.includes(value)
+      );
 
       if (!currentUser || (!currentUser.isAdmin && !isOwnPhoto)) {
         throw new AuthenticationError('Not authenticated');
@@ -268,7 +285,10 @@ export const photoResolver = {
         const fields = { ...args };
         delete fields['id'];
 
-        await PhotoModel.updateMany({ _id: { $in: args.id } }, { $set: fields });
+        await PhotoModel.updateMany(
+          { _id: { $in: args.id } },
+          { $set: fields }
+        );
 
         await session.commitTransaction();
       } catch (error) {
