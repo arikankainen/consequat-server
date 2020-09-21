@@ -233,7 +233,7 @@ export const photoResolver = {
         photo.location = args.location ? args.location : '';
         photo.album = args.album ? args.album : null;
         photo.description = args.description ? args.description : '';
-        photo.hidden = args.hidden ? args.hidden : true;
+        photo.hidden = args.hidden;
         photo.tags = args.tags ? args.tags : [];
 
         try {
