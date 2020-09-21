@@ -55,7 +55,9 @@ describe('photo addition', () => {
       name: '',
     };
     const receivedPhoto: PhotoData =
-      res.data && res.data.addPhoto ? (res.data.addPhoto as PhotoData) : emptyPhotoData;
+      res.data && res.data.addPhoto
+        ? (res.data.addPhoto as PhotoData)
+        : emptyPhotoData;
 
     expect(receivedPhoto.filename).toBe(testPhoto.filename);
     expect(receivedPhoto.name).toBe(testPhoto.name);
@@ -349,11 +351,19 @@ describe('queries', () => {
     }
 
     const receivedPhotos: PhotoData[] =
-      res.data && res.data.listPhotos ? (res.data.listPhotos as PhotoData[]) : [];
+      res.data && res.data.listPhotos
+        ? (res.data.listPhotos as PhotoData[])
+        : [];
 
-    for (let i = 0; i < initialPhotos.length; i++) {
-      expect(receivedPhotos[i].filename).toBe(initialPhotos[i].filename);
+    const nonHiddenPhotos = initialPhotos.filter(
+      (photo) => photo.hidden === false
+    );
+    const hiddenPhotos = initialPhotos.filter((photo) => photo.hidden === true);
+
+    for (let i = 0; i < nonHiddenPhotos.length; i++) {
+      expect(receivedPhotos[i].filename).toBe(nonHiddenPhotos[i].filename);
+      expect(receivedPhotos[i].filename).not.toBe(hiddenPhotos[0].filename);
     }
-    expect(receivedPhotos).toHaveLength(initialPhotos.length);
+    expect(receivedPhotos).toHaveLength(nonHiddenPhotos.length);
   });
 });
