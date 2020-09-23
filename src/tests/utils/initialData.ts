@@ -125,3 +125,84 @@ export const initialAlbums = [
     user: '',
   },
 ];
+
+export const initialComments = [
+  {
+    text: 'CommentText1',
+    author: '',
+    photo: '',
+  },
+  {
+    text: 'CommentText2',
+    author: '',
+    photo: '',
+  },
+  {
+    text: 'CommentText3',
+    author: '',
+    photo: '',
+  },
+  {
+    text: 'CommentText4',
+    author: '',
+    photo: '',
+  },
+  {
+    text: 'CommentText5',
+    author: '',
+    photo: '',
+  },
+  {
+    text: 'CommentText6',
+    author: '',
+    photo: '',
+  },
+  {
+    text: 'CommentText7',
+    author: '',
+    photo: '',
+  },
+  {
+    text: 'CommentText8',
+    author: '',
+    photo: '',
+  },
+  {
+    text: 'CommentText9',
+    author: '',
+    photo: '',
+  },
+  {
+    text: 'CommentText10',
+    author: '',
+    photo: '',
+  },
+];
+
+export const initialComments2 = [
+  {
+    text: 'CommentText11',
+    author: '',
+    photo: '',
+  },
+  {
+    text: 'CommentText12',
+    author: '',
+    photo: '',
+  },
+  {
+    text: 'CommentText13',
+    author: '',
+    photo: '',
+  },
+  {
+    text: 'CommentText14',
+    author: '',
+    photo: '',
+  },
+  {
+    text: 'CommentText15',
+    author: '',
+    photo: '',
+  },
+];

@@ -2,8 +2,18 @@ import bcrypt from 'bcrypt';
 import UserModel, { User } from '../../models/user';
 import PhotoModel, { Photo } from '../../models/photo';
 import AlbumModel, { Album } from '../../models/album';
-import { initialUsers, initialPhotos, initialAlbums } from './initialData';
-import { createTestClient, ApolloServerTestClient } from 'apollo-server-testing';
+import CommentModel, { Comment } from '../../models/comment';
+import {
+  initialUsers,
+  initialPhotos,
+  initialAlbums,
+  initialComments,
+  initialComments2,
+} from './initialData';
+import {
+  createTestClient,
+  ApolloServerTestClient,
+} from 'apollo-server-testing';
 import { typeDefs, resolvers, ApolloServer } from '../..';
 
 export const createContextWithUser = (username: string) => {
@@ -13,7 +23,9 @@ export const createContextWithUser = (username: string) => {
   };
 };
 
-export const createTestClientWithUser = (user: string): ApolloServerTestClient => {
+export const createTestClientWithUser = (
+  user: string
+): ApolloServerTestClient => {
   return createTestClient(
     new ApolloServer({
       typeDefs,
@@ -38,6 +50,11 @@ export const albumsInDb = async (): Promise<Album[]> => {
   return albums;
 };
 
+export const commentsInDb = async (): Promise<Comment[]> => {
+  const comments = await CommentModel.find({});
+  return comments;
+};
+
 export const photosInAlbum = async (id: string | null): Promise<string[]> => {
   if (!id) return [];
   const album = await AlbumModel.findById(id);
@@ -45,14 +62,18 @@ export const photosInAlbum = async (id: string | null): Promise<string[]> => {
   return album.photos.map((photo) => String(photo));
 };
 
-export const photosInUser = async (username: string | null): Promise<string[]> => {
+export const photosInUser = async (
+  username: string | null
+): Promise<string[]> => {
   if (!username) return [];
   const user = await UserModel.findOne({ username });
   if (!user) return [];
   return user.photos.map((photo) => String(photo));
 };
 
-export const albumsInUser = async (username: string | null): Promise<string[]> => {
+export const albumsInUser = async (
+  username: string | null
+): Promise<string[]> => {
   if (!username) return [];
   const user = await UserModel.findOne({ username });
   if (!user) return [];
@@ -111,6 +132,35 @@ export const prepareInitialAlbums = async (): Promise<void> => {
 
     await user.save();
     await AlbumModel.insertMany(albumObjects);
+  }
+};
+
+export const prepareInitialComments = async (): Promise<void> => {
+  const user = await UserModel.findOne({ username: 'user' });
+  const photo = await PhotoModel.findOne({ name: 'Photo name' });
+  const photo2 = await PhotoModel.findOne({ name: 'Photo name5' });
+
+  if (user && photo && photo2) {
+    await CommentModel.deleteMany({});
+
+    const commentObjects = await Promise.all(
+      initialComments.map((comment) => {
+        comment = { ...comment, author: user.id, photo: photo.id };
+        const createdComment = new CommentModel(comment);
+        return createdComment;
+      })
+    );
+
+    const commentObjects2 = await Promise.all(
+      initialComments2.map((comment) => {
+        comment = { ...comment, author: user.id, photo: photo2.id };
+        const createdComment = new CommentModel(comment);
+        return createdComment;
+      })
+    );
+
+    await CommentModel.insertMany(commentObjects);
+    await CommentModel.insertMany(commentObjects2);
   }
 };
 
