@@ -18,6 +18,24 @@ const LIST_PHOTOS = gql`
   }
 `;
 
+const GET_PHOTO = gql`
+  query getPhoto($id: String!) {
+    getPhoto(id: $id) {
+      mainUrl,
+      thumbUrl,
+      filename,
+      thumbFilename,
+      originalFilename,
+      name,
+      location,
+      description,
+      hidden,
+      tags,
+      id,
+    }
+  }
+`;
+
 const ADD_PHOTO = gql`
   mutation addPhoto(
     $mainUrl: String!,
@@ -129,6 +147,7 @@ const EDIT_PHOTOS = gql`
 
 export default {
   LIST_PHOTOS,
+  GET_PHOTO,
   ADD_PHOTO,
   DELETE_PHOTO,
   EDIT_PHOTO,

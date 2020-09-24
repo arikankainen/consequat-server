@@ -366,4 +366,50 @@ describe('queries', () => {
     }
     expect(receivedPhotos).toHaveLength(nonHiddenPhotos.length);
   });
+
+  it('get info about non-hidden photo', async () => {
+    const { query } = createTestClient(server);
+
+    const originalPhotos = await photosInDb();
+
+    const res = await query({
+      query: Queries.GET_PHOTO,
+      variables: { id: originalPhotos[0].id },
+    });
+
+    interface PhotoData {
+      filename: string;
+    }
+
+    const receivedPhoto: PhotoData =
+      res.data && res.data.getPhoto
+        ? (res.data.getPhoto as PhotoData)
+        : { filename: '' };
+
+    expect(res.errors).toBe(undefined);
+    expect(receivedPhoto.filename).toBe(initialPhotos[0].filename);
+  });
+
+  it('cannot get info about hidden photo', async () => {
+    const { query } = createTestClient(server);
+
+    const originalPhotos = await photosInDb();
+
+    const res = await query({
+      query: Queries.GET_PHOTO,
+      variables: { id: originalPhotos[4].id },
+    });
+
+    interface PhotoData {
+      filename: string;
+    }
+
+    const receivedPhoto: PhotoData =
+      res.data && res.data.getPhoto
+        ? (res.data.getPhoto as PhotoData)
+        : { filename: '' };
+
+    expect(res.errors).toBe(undefined);
+    expect(receivedPhoto.filename).toBe('');
+  });
 });

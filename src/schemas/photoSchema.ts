@@ -22,6 +22,7 @@ export const photoSchema = gql`
 
   type Query {
     listPhotos(type: [String], keyword: String): [Photo!]
+    getPhoto(id: String!): Photo
   }
 
   type Mutation {

@@ -101,6 +101,19 @@ export const photoResolver = {
       //   .populate('user')
       //   .populate('album');
     },
+
+    getPhoto: async (
+      _root: undefined,
+      args: { id: string }
+    ): Promise<Photo | null> => {
+      const id = args.id;
+
+      return await PhotoModel.findOne({
+        $and: [{ _id: id }, { hidden: false }],
+      })
+        .populate('user')
+        .populate('album');
+    },
   },
 
   Mutation: {
