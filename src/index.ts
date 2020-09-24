@@ -41,7 +41,10 @@ const context = async ({
   let currentUser = null;
 
   if (auth && auth.toLowerCase().startsWith('bearer ') && JWT_PRIVATE_KEY) {
-    const decodedToken = jwt.verify(auth.substring(7), JWT_PRIVATE_KEY) as UserInToken;
+    const decodedToken = jwt.verify(
+      auth.substring(7),
+      JWT_PRIVATE_KEY
+    ) as UserInToken;
     currentUser = await UserModel.findById(decodedToken.id);
   }
 
@@ -61,11 +64,11 @@ app.use(cors());
 app.use(express.static('build'));
 
 // allaoleva estää GraphQL playgroundin toiminnan, mutta ilman sitä ei toimi herokussa refreshaus
-/*
+
 app.get('*', (_req, res) => {
   res.sendFile('index.html', { root: path.join(__dirname, '../build/') });
 });
-*/
+
 server.applyMiddleware({ app });
 
 const port = process.env.PORT || 4000;

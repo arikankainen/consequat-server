@@ -2,3 +2,4 @@ node_modules
 .env
 google-cloud-service-key.json
 debug.log
+report*.json
