@@ -55,11 +55,13 @@ export const commentResolver = {
       });
 
       try {
-        return await comment.save();
+        await comment.save();
       } catch (error) {
         const message = isError(error) ? error.message : '';
         throw new Error(message);
       }
+
+      return await comment.populate('author').execPopulate();
     },
 
     deleteComment: async (
