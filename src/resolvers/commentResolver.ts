@@ -32,7 +32,7 @@ export const commentResolver = {
 
       return await CommentModel.find({
         $and: [photoFilter, authorFilter],
-      }).populate('user');
+      }).populate('author');
     },
   },
 
