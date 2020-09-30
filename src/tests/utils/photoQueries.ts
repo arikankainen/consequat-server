@@ -145,6 +145,26 @@ const EDIT_PHOTOS = gql`
   }
 `;
 
+const EDIT_TAGS = gql`
+  mutation editTags(
+    $id: [ID!]!,
+    $addedTags: [String],
+    $deletedTags: [String],
+  ) {
+    editTags(
+      id: $id,
+      addedTags: $addedTags,
+      deletedTags: $deletedTags,
+    ) {
+      id,
+      name,
+      location,
+      description,
+      tags,
+    }
+  }
+`;
+
 export default {
   LIST_PHOTOS,
   GET_PHOTO,
@@ -152,4 +172,5 @@ export default {
   DELETE_PHOTO,
   EDIT_PHOTO,
   EDIT_PHOTOS,
+  EDIT_TAGS,
 };

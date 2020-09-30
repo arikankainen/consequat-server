@@ -51,7 +51,7 @@ export const initialPhotos = [
     location: 'Photo location2',
     description: 'Photo description2',
     hidden: false,
-    tags: ['landscape', 'night', 'forrest'],
+    tags: ['testTag1', 'landscape', 'night', 'forrest'],
     album: null,
     user: '',
   },

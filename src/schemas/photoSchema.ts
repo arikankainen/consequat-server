@@ -65,5 +65,11 @@ export const photoSchema = gql`
       album: String
       id: [ID!]!
     ): [Photo]
+
+    editTags(
+      addedTags: [String]
+      deletedTags: [String]
+      id: [ID!]!
+    ): [Photo]
   }
 `;

@@ -25,6 +25,12 @@ interface EditPhotosArgs {
   id?: string[];
 }
 
+interface EditTagsArgs {
+  addedTags?: string[];
+  deletedTags?: string[];
+  id?: string[];
+}
+
 type TypeSelector = 'name' | 'location' | 'description' | 'tags';
 
 interface ListPhotosArgs {
@@ -302,6 +308,58 @@ export const photoResolver = {
           { _id: { $in: args.id } },
           { $set: fields }
         );
+
+        await session.commitTransaction();
+      } catch (error) {
+        logger.error(error);
+
+        await session.abortTransaction();
+      } finally {
+        session.endSession();
+      }
+
+      const photos = await PhotoModel.find({ _id: { $in: args.id } });
+      return photos;
+    },
+
+    editTags: async (
+      _root: undefined,
+      args: EditTagsArgs,
+      context: UserInContext
+    ): Promise<Photo[] | null> => {
+      const currentUser = context.currentUser;
+      const id = args.id;
+      if (!id) return null;
+
+      const isOwnPhoto = id.every((value) =>
+        currentUser.photos.includes(value)
+      );
+
+      if (!currentUser || (!currentUser.isAdmin && !isOwnPhoto)) {
+        throw new AuthenticationError('Not authenticated');
+      }
+
+      const session = await mongoose.startSession();
+      session.startTransaction();
+
+      try {
+        if (args.deletedTags && args.deletedTags.length > 0) {
+          await PhotoModel.updateMany(
+            { _id: { $in: id } },
+            {
+              $pullAll: { tags: args.deletedTags },
+            }
+          );
+        }
+
+        if (args.addedTags && args.addedTags.length > 0) {
+          await PhotoModel.updateMany(
+            { _id: { $in: id } },
+            {
+              $addToSet: { tags: { $each: args.addedTags } },
+            }
+          );
+        }
 
         await session.commitTransaction();
       } catch (error) {

@@ -413,3 +413,43 @@ describe('queries', () => {
     expect(receivedPhoto.filename).toBe('');
   });
 });
+
+describe('editing tags', () => {
+  it('user can modify add and delete tags on multiple photos', async () => {
+    const { mutate } = createTestClientWithUser('user');
+
+    const originalPhotos = await photosInDb();
+    const id = originalPhotos.map((photo) => photo.id);
+
+    const modifiedPhoto = {
+      id,
+      addedTags: ['testTag1', 'testTag2', 'testTag3'],
+      deletedTags: ['animals', 'landscape'],
+    };
+
+    const res = await mutate({
+      mutation: Queries.EDIT_TAGS,
+      variables: modifiedPhoto,
+    });
+
+    const updatedPhotos = await photosInDb();
+
+    expect(res.errors).toBe(undefined);
+    expect(originalPhotos).toHaveLength(initialPhotos.length);
+    expect(updatedPhotos).toHaveLength(initialPhotos.length);
+
+    for (let i = 0; i < initialPhotos.length; i++) {
+      expect(Array.from(updatedPhotos[i].tags)).toContain('testTag1');
+      expect(Array.from(updatedPhotos[i].tags)).toContain('testTag2');
+      expect(Array.from(updatedPhotos[i].tags)).toContain('testTag3');
+      expect(Array.from(updatedPhotos[i].tags)).not.toContain('animals');
+      expect(Array.from(updatedPhotos[i].tags)).not.toContain('landscape');
+    }
+
+    expect(Array.from(updatedPhotos[1].tags)).toContain('night');
+    expect(Array.from(updatedPhotos[1].tags)).toContain('forrest');
+    expect(Array.from(updatedPhotos[2].tags)).toContain('cat');
+    expect(Array.from(updatedPhotos[3].tags)).toContain('portrait');
+    expect(Array.from(updatedPhotos[3].tags)).toContain('photomodel');
+  });
+});
