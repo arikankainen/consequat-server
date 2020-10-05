@@ -9,6 +9,16 @@ export const testPhoto = {
   name: 'Photo name_test',
   location: 'Photo location_test',
   description: 'Photo description_test',
+  exif: {
+    dateTimeOriginal: 'date_test',
+    fNumber: 'f_test',
+    isoSpeedRatings: 'iso_test',
+    shutterSpeedValue: 'shutter_test',
+    focalLength: 'focal_test',
+    flash: 'flash_test',
+    make: 'make_test',
+    model: 'model_test',
+  },
 };
 
 export const testAlbum = {

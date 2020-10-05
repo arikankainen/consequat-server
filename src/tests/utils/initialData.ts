@@ -22,6 +22,59 @@ export const initialUsers = [
   },
 ];
 
+export const initialExif = [
+  {
+    dateTimeOriginal: 'date1',
+    fNumber: 'f1',
+    isoSpeedRatings: 'iso1',
+    shutterSpeedValue: 'shutter1',
+    focalLength: 'focal1',
+    flash: 'flash1',
+    make: 'make1',
+    model: 'model1',
+  },
+  {
+    dateTimeOriginal: 'date2',
+    fNumber: 'f2',
+    isoSpeedRatings: 'iso2',
+    shutterSpeedValue: 'shutter2',
+    focalLength: 'focal2',
+    flash: 'flash2',
+    make: 'make2',
+    model: 'model2',
+  },
+  {
+    dateTimeOriginal: 'date3',
+    fNumber: 'f3',
+    isoSpeedRatings: 'iso3',
+    shutterSpeedValue: 'shutter3',
+    focalLength: 'focal3',
+    flash: 'flash3',
+    make: 'make3',
+    model: 'model3',
+  },
+  {
+    dateTimeOriginal: 'date4',
+    fNumber: 'f4',
+    isoSpeedRatings: 'iso4',
+    shutterSpeedValue: 'shutter4',
+    focalLength: 'focal4',
+    flash: 'flash4',
+    make: 'make4',
+    model: 'model4',
+  },
+  {
+    dateTimeOriginal: 'date5',
+    fNumber: 'f5',
+    isoSpeedRatings: 'iso5',
+    shutterSpeedValue: 'shutter5',
+    focalLength: 'focal5',
+    flash: 'flash5',
+    make: 'make5',
+    model: 'model5',
+  },
+];
+
 export const initialPhotos = [
   {
     mainUrl: 'https://main.url',
@@ -38,6 +91,7 @@ export const initialPhotos = [
     tags: ['landscape', 'animals'],
     album: null,
     user: '',
+    exif: initialExif[0],
   },
   {
     mainUrl: 'https://main.url2',
@@ -54,6 +108,7 @@ export const initialPhotos = [
     tags: ['testTag1', 'landscape', 'night', 'forrest'],
     album: null,
     user: '',
+    exif: initialExif[1],
   },
   {
     mainUrl: 'https://main.url3',
@@ -70,6 +125,7 @@ export const initialPhotos = [
     tags: ['animals', 'cat'],
     album: null,
     user: '',
+    exif: initialExif[2],
   },
   {
     mainUrl: 'https://main.url4',
@@ -86,6 +142,7 @@ export const initialPhotos = [
     tags: ['portrait', 'photomodel'],
     album: null,
     user: '',
+    exif: initialExif[3],
   },
   {
     mainUrl: 'https://main.url5',
@@ -102,6 +159,7 @@ export const initialPhotos = [
     tags: [''],
     album: null,
     user: '',
+    exif: initialExif[4],
   },
 ];
 

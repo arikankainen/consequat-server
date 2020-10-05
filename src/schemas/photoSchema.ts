@@ -1,6 +1,28 @@
 import { gql } from 'apollo-server-express';
 
 export const photoSchema = gql`
+  type Exif {
+    dateTimeOriginal: String!
+    fNumber: String!
+    isoSpeedRatings: String!
+    shutterSpeedValue: String!
+    focalLength: String!
+    flash: String!
+    make: String!
+    model: String!
+  }
+
+  input ExifInput {
+    dateTimeOriginal: String!
+    fNumber: String!
+    isoSpeedRatings: String!
+    shutterSpeedValue: String!
+    focalLength: String!
+    flash: String!
+    make: String!
+    model: String!
+  }
+
   type Photo {
     mainUrl: String!
     thumbUrl: String!
@@ -17,6 +39,7 @@ export const photoSchema = gql`
     tags: [String]
     user: User!
     album: Album
+    exif: Exif!
     id: ID!
   }
 
@@ -40,6 +63,7 @@ export const photoSchema = gql`
       hidden: Boolean
       tags: [String]
       album: String
+      exif: ExifInput!
     ): Photo
 
     deletePhoto(

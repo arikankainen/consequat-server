@@ -1,6 +1,17 @@
 import mongoose from 'mongoose';
 import uniqueValidator from 'mongoose-unique-validator';
 
+export interface Exif {
+  dateTimeOriginal: string;
+  fNumber: string;
+  isoSpeedRatings: string;
+  shutterSpeedValue: string;
+  focalLength: string;
+  flash: string;
+  make: string;
+  model: string;
+}
+
 export interface Photo extends mongoose.Document {
   mainUrl: string;
   thumbUrl: string;
@@ -17,6 +28,7 @@ export interface Photo extends mongoose.Document {
   tags: string[];
   user: string;
   album: string | null;
+  exif: Exif;
   id: string;
 }
 
@@ -70,6 +82,10 @@ const photoSchema: mongoose.Schema = new mongoose.Schema({
   album: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Album',
+  },
+  exif: {
+    type: Object,
+    required: true,
   },
 });
 

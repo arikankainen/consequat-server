@@ -50,6 +50,7 @@ const ADD_PHOTO = gql`
     $description: String,
     $hidden: Boolean,
     $tags: [String],
+    $exif: ExifInput!,
   ) {
     addPhoto(
       mainUrl: $mainUrl,
@@ -64,6 +65,7 @@ const ADD_PHOTO = gql`
       description: $description,
       hidden: $hidden,
       tags: $tags,
+      exif: $exif,
     ) {
       filename,
       name,

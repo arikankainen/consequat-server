@@ -1,5 +1,5 @@
 import { AuthenticationError } from 'apollo-server-express';
-import PhotoModel, { Photo } from '../models/photo';
+import PhotoModel, { Exif, Photo } from '../models/photo';
 import UserModel from '../models/user';
 import AlbumModel from '../models/album';
 import { UserInContext } from '../utils/types';
@@ -22,6 +22,7 @@ interface EditPhotosArgs {
   tags?: string[];
   dateAdded?: string;
   album?: string;
+  exif?: Exif;
   id?: string[];
 }
 
@@ -129,6 +130,7 @@ export const photoResolver = {
       context: UserInContext
     ): Promise<Photo | null> => {
       const currentUser = context.currentUser;
+      console.log(args);
 
       if (!currentUser) {
         throw new AuthenticationError('Not authenticated');
@@ -149,6 +151,7 @@ export const photoResolver = {
         tags: args.tags || [],
         album: args.album || null,
         user: currentUser.id,
+        exif: args.exif,
       });
 
       const user = await UserModel.findById(currentUser.id);
