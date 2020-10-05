@@ -145,7 +145,7 @@ export const photoResolver = {
         name: args.name || '',
         location: args.location || '',
         description: args.description || '',
-        hidden: args.hidden || false,
+        hidden: args.hidden !== undefined ? args.hidden : true,
         tags: args.tags || [],
         album: args.album || null,
         user: currentUser.id,
