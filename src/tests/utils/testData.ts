@@ -18,6 +18,8 @@ export const testPhoto = {
     flash: 'flash_test',
     make: 'make_test',
     model: 'model_test',
+    gpsLatitude: 0,
+    gpsLongitude: 0,
   },
 };
 

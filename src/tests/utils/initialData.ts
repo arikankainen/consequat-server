@@ -32,6 +32,8 @@ export const initialExif = [
     flash: 'flash1',
     make: 'make1',
     model: 'model1',
+    gpsLatitude: 1,
+    gpsLongitude: 1,
   },
   {
     dateTimeOriginal: 'date2',
@@ -42,6 +44,8 @@ export const initialExif = [
     flash: 'flash2',
     make: 'make2',
     model: 'model2',
+    gpsLatitude: 2,
+    gpsLongitude: 2,
   },
   {
     dateTimeOriginal: 'date3',
@@ -52,6 +56,8 @@ export const initialExif = [
     flash: 'flash3',
     make: 'make3',
     model: 'model3',
+    gpsLatitude: 3,
+    gpsLongitude: 3,
   },
   {
     dateTimeOriginal: 'date4',
@@ -62,6 +68,8 @@ export const initialExif = [
     flash: 'flash4',
     make: 'make4',
     model: 'model4',
+    gpsLatitude: 4,
+    gpsLongitude: 4,
   },
   {
     dateTimeOriginal: 'date5',
@@ -72,6 +80,8 @@ export const initialExif = [
     flash: 'flash5',
     make: 'make5',
     model: 'model5',
+    gpsLatitude: 5,
+    gpsLongitude: 5,
   },
 ];
 

@@ -10,6 +10,8 @@ export const photoSchema = gql`
     flash: String!
     make: String!
     model: String!
+    gpsLatitude: Float!
+    gpsLongitude: Float!
   }
 
   input ExifInput {
@@ -21,6 +23,8 @@ export const photoSchema = gql`
     flash: String!
     make: String!
     model: String!
+    gpsLatitude: Float!
+    gpsLongitude: Float!
   }
 
   type Photo {

@@ -130,7 +130,6 @@ export const photoResolver = {
       context: UserInContext
     ): Promise<Photo | null> => {
       const currentUser = context.currentUser;
-      console.log(args);
 
       if (!currentUser) {
         throw new AuthenticationError('Not authenticated');

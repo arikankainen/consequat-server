@@ -10,6 +10,8 @@ export interface Exif {
   flash: string;
   make: string;
   model: string;
+  gpsLatitude: number;
+  gpsLongitude: number;
 }
 
 export interface Photo extends mongoose.Document {
