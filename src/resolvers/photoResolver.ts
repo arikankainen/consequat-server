@@ -38,6 +38,8 @@ type TypeSelector = 'name' | 'location' | 'description' | 'tags';
 interface ListPhotosArgs {
   type?: TypeSelector[];
   keyword?: string;
+  limit?: number;
+  offset?: number;
 }
 
 export const photoResolver = {
@@ -48,6 +50,8 @@ export const photoResolver = {
     ): Promise<Photo[]> => {
       const type = args.type;
       const keyword = args.keyword;
+      const limit = args.limit || 0;
+      const offset = args.offset || 0;
 
       interface SearchOptions {
         $regex: string;
@@ -90,6 +94,8 @@ export const photoResolver = {
       return await PhotoModel.find({
         $and: [searchQuery, { hidden: false }],
       })
+        .skip(offset)
+        .limit(limit)
         .populate('user')
         .populate('album');
 
