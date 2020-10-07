@@ -4,6 +4,7 @@ import { Photo } from '../models/photo';
 import { User } from '../models/user';
 import { UserInContext } from '../utils/types';
 import { isError } from '../utils/typeguards';
+import logger from '../utils/logger';
 
 interface ListCommentsArgs {
   photo?: Photo;
@@ -57,6 +58,7 @@ export const commentResolver = {
       try {
         await comment.save();
       } catch (error) {
+        logger.error(error);
         const message = isError(error) ? error.message : '';
         throw new Error(message);
       }
@@ -84,6 +86,7 @@ export const commentResolver = {
       try {
         return await CommentModel.findByIdAndDelete(args.id);
       } catch (error) {
+        logger.error(error);
         const message = isError(error) ? error.message : '';
         throw new Error(message);
       }

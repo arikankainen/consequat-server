@@ -2,6 +2,7 @@ import { AuthenticationError } from 'apollo-server-express';
 import PhotoModel, { Exif, Photo } from '../models/photo';
 import UserModel from '../models/user';
 import AlbumModel from '../models/album';
+import CommentModel from '../models/comment';
 import { UserInContext } from '../utils/types';
 import { isError } from '../utils/typeguards';
 import mongoose from 'mongoose';
@@ -153,38 +154,46 @@ export const photoResolver = {
         exif: args.exif,
       });
 
-      const user = await UserModel.findById(currentUser.id);
-      if (user) {
-        user.photos = user.photos.concat(photo.id);
-        try {
-          await user.save();
-        } catch (error) {
-          const message = isError(error) ? error.message : '';
-          throw new Error(message);
-        }
-      }
+      let populatedPhoto: Photo | null = null;
 
-      if (args.album) {
-        const album = await AlbumModel.findById(args.album);
-        if (album) {
-          album.photos = album.photos.concat(photo.id);
-          try {
-            await album.save();
-          } catch (error) {
-            const message = isError(error) ? error.message : '';
-            throw new Error(message);
-          }
-        }
-      }
+      const session = await mongoose.startSession();
+      session.startTransaction();
 
       try {
-        await photo.save();
+        const user = await UserModel.findById(currentUser.id, null, {
+          session,
+        });
+
+        if (user) {
+          user.photos = user.photos.concat(photo.id);
+          await user.save({ session });
+        }
+
+        if (args.album) {
+          const album = await AlbumModel.findById(args.album, null, {
+            session,
+          });
+
+          if (album) {
+            album.photos = album.photos.concat(photo.id);
+            await album.save({ session });
+          }
+        }
+
+        await photo.save({ session });
+        populatedPhoto = await photo.populate('user').execPopulate();
+        await session.commitTransaction();
       } catch (error) {
+        await session.abortTransaction();
+
+        logger.error(error);
         const message = isError(error) ? error.message : '';
         throw new Error(message);
+      } finally {
+        session.endSession();
       }
 
-      return await photo.populate('user').execPopulate();
+      return populatedPhoto;
     },
 
     deletePhoto: async (
@@ -199,19 +208,41 @@ export const photoResolver = {
       if (!currentUser || (!currentUser.isAdmin && !isOwnPhoto)) {
         throw new AuthenticationError('Not authenticated');
       }
-      const photo = await PhotoModel.findByIdAndDelete(args.id);
-      if (photo && photo.user) {
-        await UserModel.findByIdAndUpdate(
-          { _id: photo.user },
-          { $pullAll: { photos: [id] } }
-        );
-      }
 
-      if (photo && photo.album) {
-        await AlbumModel.findByIdAndUpdate(
-          { _id: photo.album },
-          { $pullAll: { photos: [id] } }
-        );
+      const session = await mongoose.startSession();
+      session.startTransaction();
+
+      const photo = await PhotoModel.findById(args.id);
+
+      try {
+        await PhotoModel.findByIdAndDelete(args.id, { session });
+        await CommentModel.deleteMany({ photo: id }, { session });
+
+        if (photo && photo.user) {
+          await UserModel.findByIdAndUpdate(
+            { _id: photo.user },
+            { $pullAll: { photos: [id] } },
+            { session }
+          );
+        }
+
+        if (photo && photo.album) {
+          await AlbumModel.findByIdAndUpdate(
+            { _id: photo.album },
+            { $pullAll: { photos: [id] } },
+            { session }
+          );
+        }
+
+        await session.commitTransaction();
+      } catch (error) {
+        await session.abortTransaction();
+
+        logger.error(error);
+        const message = isError(error) ? error.message : '';
+        throw new Error(message);
+      } finally {
+        session.endSession();
       }
 
       return photo;
@@ -232,37 +263,50 @@ export const photoResolver = {
 
       const photo = await PhotoModel.findById(args.id);
 
-      if (photo) {
-        const oldAlbum = photo.album;
-        const newAlbum = args.album;
+      const session = await mongoose.startSession();
+      session.startTransaction();
 
-        if (oldAlbum?.toString() !== newAlbum?.toString()) {
-          if (oldAlbum) {
-            await AlbumModel.findByIdAndUpdate(
-              { _id: oldAlbum },
-              { $pull: { photos: id } }
-            );
-          }
-          if (newAlbum) {
-            await AlbumModel.findByIdAndUpdate(
-              { _id: newAlbum },
-              { $push: { photos: id } }
-            );
-          }
-        }
-        photo.name = args.name ? args.name : '';
-        photo.location = args.location ? args.location : '';
-        photo.album = args.album ? args.album : null;
-        photo.description = args.description ? args.description : '';
-        photo.hidden = args.hidden;
-        photo.tags = args.tags ? args.tags : [];
+      try {
+        if (photo) {
+          const oldAlbum = photo.album;
+          const newAlbum = args.album;
 
-        try {
-          await photo.save();
-        } catch (error) {
-          const message = isError(error) ? error.message : '';
-          throw new Error(message);
+          if (oldAlbum?.toString() !== newAlbum?.toString()) {
+            if (oldAlbum) {
+              await AlbumModel.findByIdAndUpdate(
+                { _id: oldAlbum },
+                { $pull: { photos: id } },
+                { session }
+              );
+            }
+            if (newAlbum) {
+              await AlbumModel.findByIdAndUpdate(
+                { _id: newAlbum },
+                { $push: { photos: id } },
+                { session }
+              );
+            }
+          }
+
+          photo.name = args.name ? args.name : '';
+          photo.location = args.location ? args.location : '';
+          photo.album = args.album ? args.album : null;
+          photo.description = args.description ? args.description : '';
+          photo.hidden = args.hidden;
+          photo.tags = args.tags ? args.tags : [];
+
+          await photo.save({ session });
         }
+
+        await session.commitTransaction();
+      } catch (error) {
+        await session.abortTransaction();
+
+        logger.error(error);
+        const message = isError(error) ? error.message : '';
+        throw new Error(message);
+      } finally {
+        session.endSession();
       }
 
       return photo;
@@ -292,13 +336,15 @@ export const photoResolver = {
         if (args.album !== undefined) {
           await AlbumModel.updateMany(
             { photos: { $in: id } },
-            { $pullAll: { photos: id } }
+            { $pullAll: { photos: id } },
+            { session }
           );
 
           if (args.album !== null) {
             await AlbumModel.updateMany(
               { _id: args.album },
-              { $push: { photos: { $each: id } } }
+              { $push: { photos: { $each: id } } },
+              { session }
             );
           }
         }
@@ -308,7 +354,8 @@ export const photoResolver = {
 
         await PhotoModel.updateMany(
           { _id: { $in: args.id } },
-          { $set: fields }
+          { $set: fields },
+          { session }
         );
 
         await session.commitTransaction();
@@ -350,7 +397,8 @@ export const photoResolver = {
             { _id: { $in: id } },
             {
               $pullAll: { tags: args.deletedTags },
-            }
+            },
+            { session }
           );
         }
 
@@ -359,15 +407,18 @@ export const photoResolver = {
             { _id: { $in: id } },
             {
               $addToSet: { tags: { $each: args.addedTags } },
-            }
+            },
+            { session }
           );
         }
 
         await session.commitTransaction();
       } catch (error) {
-        logger.error(error);
-
         await session.abortTransaction();
+
+        logger.error(error);
+        const message = isError(error) ? error.message : '';
+        throw new Error(message);
       } finally {
         session.endSession();
       }

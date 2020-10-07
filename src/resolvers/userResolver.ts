@@ -8,6 +8,7 @@ import UserModel, { User } from '../models/user';
 import { UserInContext } from '../utils/types';
 import { isError } from '../utils/typeguards';
 import Logger from '../utils/logger';
+import logger from '../utils/logger';
 
 interface EditUser {
   email?: string;
@@ -88,6 +89,7 @@ export const userResolver = {
       try {
         await createUserValidation.validate(args);
       } catch (error) {
+        logger.error(error);
         const message = isError(error) ? error.message : '';
         throw new UserInputError(message, { invalidArgs: args });
       }
@@ -103,6 +105,7 @@ export const userResolver = {
       try {
         await user.save();
       } catch (error) {
+        logger.error(error);
         const message = isError(error) ? error.message : '';
         throw new UserInputError(message, { invalidArgs: args });
       }
@@ -128,6 +131,7 @@ export const userResolver = {
         try {
           await emailChangeValidation.validate(args);
         } catch (error) {
+          logger.error(error);
           const message = isError(error) ? error.message : '';
           throw new UserInputError(message, { invalidArgs: args });
         }
@@ -139,6 +143,7 @@ export const userResolver = {
         try {
           await passwordChangeValidation.validate(args);
         } catch (error) {
+          logger.error(error);
           const message = isError(error) ? error.message : '';
           throw new UserInputError(message, { invalidArgs: args });
         }
@@ -157,6 +162,7 @@ export const userResolver = {
 
           updatedPassword = await bcrypt.hash(args.newPassword, saltRounds);
         } catch (error) {
+          logger.error(error);
           const message = isError(error) ? error.message : '';
           throw new Error(message);
         }
@@ -181,6 +187,7 @@ export const userResolver = {
 
         return user;
       } catch (error) {
+        logger.error(error);
         const message = isError(error) ? error.message : '';
         throw new Error(message);
       }
@@ -200,6 +207,7 @@ export const userResolver = {
         try {
           await UserModel.findByIdAndRemove(user?.id);
         } catch (error) {
+          logger.error(error);
           const message = isError(error) ? error.message : '';
           throw new UserInputError(message, { invalidArgs: args });
         }

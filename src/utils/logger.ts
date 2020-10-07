@@ -3,7 +3,7 @@ const log = (...params: Array<string | undefined>): void => {
 };
 
 const error = (...params: Array<string | undefined>): void => {
-  console.error(...params);
+  if (process.env.NODE_ENV === 'development') console.error(...params);
 };
 
 export default {

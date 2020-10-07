@@ -3,6 +3,8 @@ import UserModel from '../models/user';
 import AlbumModel, { Album } from '../models/album';
 import { UserInContext } from '../utils/types';
 import { isError } from '../utils/typeguards';
+import mongoose from 'mongoose';
+import logger from '../utils/logger';
 
 export const albumResolver = {
   Query: {
@@ -30,24 +32,31 @@ export const albumResolver = {
       });
 
       const user = await UserModel.findById(currentUser.id);
-      if (user) {
-        user.albums = user.albums.concat(album.id);
-        try {
-          await user.save();
-        } catch (error) {
-          const message = isError(error) ? error.message : '';
-          throw new Error(message);
-        }
-      }
+      let populatedAlbum: Album | null = null;
+
+      const session = await mongoose.startSession();
+      session.startTransaction();
 
       try {
+        if (user) {
+          user.albums = user.albums.concat(album.id);
+          await user.save();
+        }
+
         await album.save();
+        populatedAlbum = await album.populate('user').execPopulate();
+        await session.commitTransaction();
       } catch (error) {
+        await session.abortTransaction();
+
+        logger.error(error);
         const message = isError(error) ? error.message : '';
         throw new Error(message);
+      } finally {
+        session.endSession();
       }
 
-      return await album.populate('user').execPopulate();
+      return populatedAlbum;
     },
 
     deleteAlbum: async (
@@ -63,11 +72,30 @@ export const albumResolver = {
         throw new AuthenticationError('Not authenticated');
       }
 
-      const album = await AlbumModel.findByIdAndDelete(args.id);
-      await UserModel.findByIdAndUpdate(
-        { _id: currentUser.id },
-        { $pullAll: { albums: [id] } }
-      );
+      const session = await mongoose.startSession();
+      session.startTransaction();
+
+      const album = await AlbumModel.findById(args.id);
+
+      try {
+        await AlbumModel.findByIdAndDelete(args.id, { session });
+
+        await UserModel.findByIdAndUpdate(
+          { _id: currentUser.id },
+          { $pullAll: { albums: [id] } },
+          { session }
+        );
+
+        await session.commitTransaction();
+      } catch (error) {
+        await session.abortTransaction();
+
+        logger.error(error);
+        const message = isError(error) ? error.message : '';
+        throw new Error(message);
+      } finally {
+        session.endSession();
+      }
 
       return album;
     },
@@ -94,6 +122,7 @@ export const albumResolver = {
         try {
           await album.save();
         } catch (error) {
+          logger.error(error);
           const message = isError(error) ? error.message : '';
           throw new Error(message);
         }

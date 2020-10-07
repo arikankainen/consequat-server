@@ -2,15 +2,21 @@ import { createTestClient } from 'apollo-server-testing';
 import { server, mongoose } from '..';
 import Queries from './utils/photoQueries';
 import { testPhoto } from './utils/testData';
-import { initialPhotos } from './utils/initialData';
+import {
+  initialComments,
+  initialComments2,
+  initialPhotos,
+} from './utils/initialData';
 
 import {
   photosInDb,
+  commentsInDb,
   prepareInitialAlbums,
   preparePhotosToAlbums,
   photosInAlbum,
   albumsInDb,
   photosInUser,
+  prepareInitialComments,
 } from './utils/helpers';
 
 import {
@@ -23,6 +29,7 @@ beforeEach(async () => {
   await prepareInitialUsers();
   await prepareInitialPhotos();
   await prepareInitialAlbums();
+  await prepareInitialComments();
   await preparePhotosToAlbums();
 });
 
@@ -72,6 +79,7 @@ describe('photo deletion', () => {
     const { mutate } = createTestClientWithUser('user');
 
     const originalPhotos = await photosInDb();
+    const originalComments = await commentsInDb();
     const originalPhotosInUser = await photosInUser('user');
 
     const photoToDelete = originalPhotos[0];
@@ -87,6 +95,7 @@ describe('photo deletion', () => {
 
     const updatedPhotosInUser = await photosInUser('user');
     const updatedPhotos = await photosInDb();
+    const updatedComments = await commentsInDb();
     const updatedPhotosInAlbum = await photosInAlbum(albumId);
 
     expect(res.errors).toBe(undefined);
@@ -97,6 +106,11 @@ describe('photo deletion', () => {
     expect(updatedPhotosInAlbum).not.toContain(photoId);
     expect(updatedPhotosInAlbum).toHaveLength(originalPhotosInAlbum.length - 1);
     expect(updatedPhotosInUser).toHaveLength(originalPhotosInUser.length - 1);
+
+    expect(originalComments).toHaveLength(
+      initialComments.length + initialComments2.length
+    );
+    expect(updatedComments).toHaveLength(initialComments2.length);
   });
 
   it('user cannot delete other users photo', async () => {
