@@ -8,6 +8,11 @@ import { isError } from '../utils/typeguards';
 import mongoose from 'mongoose';
 import logger from '../utils/logger';
 
+interface ListPhotos {
+  totalCount: number;
+  photos: Photo[];
+}
+
 interface EditPhotosArgs {
   mainUrl?: string;
   thumbUrl?: string;
@@ -47,7 +52,7 @@ export const photoResolver = {
     listPhotos: async (
       _root: undefined,
       args: ListPhotosArgs
-    ): Promise<Photo[]> => {
+    ): Promise<ListPhotos> => {
       const type = args.type;
       const keyword = args.keyword;
       const limit = args.limit || 0;
@@ -91,13 +96,22 @@ export const photoResolver = {
         searchQuery = { $or: searchArray };
       }
 
-      return await PhotoModel.find({
+      const photosForCount = await PhotoModel.find({
+        $and: [searchQuery, { hidden: false }],
+      });
+
+      const photos = await PhotoModel.find({
         $and: [searchQuery, { hidden: false }],
       })
         .skip(offset)
         .limit(limit)
         .populate('user')
         .populate('album');
+
+      return {
+        totalCount: photosForCount.length,
+        photos,
+      };
 
       // return await PhotoModel.find({
       //   $and: [

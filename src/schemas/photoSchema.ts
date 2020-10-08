@@ -47,8 +47,13 @@ export const photoSchema = gql`
     id: ID!
   }
 
+  type ListPhotos {
+    totalCount: Int!
+    photos: [Photo!]
+  }
+
   type Query {
-    listPhotos(type: [String], keyword: String, offset: Int, limit: Int): [Photo!]
+    listPhotos(type: [String], keyword: String, offset: Int, limit: Int): ListPhotos
     getPhoto(id: String!): Photo
   }
 

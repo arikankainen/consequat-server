@@ -361,24 +361,36 @@ describe('queries', () => {
     const res = await query({ query: Queries.LIST_PHOTOS });
 
     interface PhotoData {
-      filename: string;
+      totalCount: number;
+      photos: [{ filename: string }];
     }
 
-    const receivedPhotos: PhotoData[] =
+    const emptyPhotoData: PhotoData = {
+      totalCount: 0,
+      photos: [{ filename: '' }],
+    };
+
+    const receivedPhotos: PhotoData =
       res.data && res.data.listPhotos
-        ? (res.data.listPhotos as PhotoData[])
-        : [];
+        ? (res.data.listPhotos as PhotoData)
+        : emptyPhotoData;
 
     const nonHiddenPhotos = initialPhotos.filter(
       (photo) => photo.hidden === false
     );
     const hiddenPhotos = initialPhotos.filter((photo) => photo.hidden === true);
 
+    expect(receivedPhotos.totalCount).toBe(4);
+
     for (let i = 0; i < nonHiddenPhotos.length; i++) {
-      expect(receivedPhotos[i].filename).toBe(nonHiddenPhotos[i].filename);
-      expect(receivedPhotos[i].filename).not.toBe(hiddenPhotos[0].filename);
+      expect(receivedPhotos.photos[i].filename).toBe(
+        nonHiddenPhotos[i].filename
+      );
+      expect(receivedPhotos.photos[i].filename).not.toBe(
+        hiddenPhotos[0].filename
+      );
     }
-    expect(receivedPhotos).toHaveLength(nonHiddenPhotos.length);
+    expect(receivedPhotos.photos).toHaveLength(nonHiddenPhotos.length);
   });
 
   it('get info about non-hidden photo', async () => {

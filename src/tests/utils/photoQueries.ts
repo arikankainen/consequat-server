@@ -3,17 +3,20 @@ import gql from 'graphql-tag';
 const LIST_PHOTOS = gql`
   query {
     listPhotos {
-      mainUrl,
-      thumbUrl,
-      filename,
-      thumbFilename,
-      originalFilename,
-      name,
-      location,
-      description,
-      hidden,
-      tags,
-      id,
+      totalCount,
+      photos {
+        mainUrl,
+        thumbUrl,
+        filename,
+        thumbFilename,
+        originalFilename,
+        name,
+        location,
+        description,
+        hidden,
+        tags,
+        id,
+      }
     }
   }
 `;
