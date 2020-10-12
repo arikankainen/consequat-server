@@ -281,6 +281,7 @@ export const photoResolver = {
         throw new AuthenticationError('Not authenticated');
       }
 
+      let populatedPhoto: Photo | null = null;
       const photo = await PhotoModel.findById(args.id);
 
       const session = await mongoose.startSession();
@@ -316,6 +317,7 @@ export const photoResolver = {
           photo.tags = args.tags ? args.tags : [];
 
           await photo.save({ session });
+          populatedPhoto = await photo.populate('album').execPopulate();
         }
 
         await session.commitTransaction();
@@ -329,7 +331,7 @@ export const photoResolver = {
         session.endSession();
       }
 
-      return photo;
+      return populatedPhoto;
     },
 
     editPhotos: async (
@@ -387,7 +389,9 @@ export const photoResolver = {
         session.endSession();
       }
 
-      const photos = await PhotoModel.find({ _id: { $in: args.id } });
+      const photos = await PhotoModel.find({ _id: { $in: args.id } }).populate(
+        'album'
+      );
       return photos;
     },
 
