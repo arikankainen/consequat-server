@@ -66,6 +66,8 @@ export const userResolver = {
       _args: undefined,
       context: UserInContext
     ): Promise<User | null> => {
+      if (!context || !context.currentUser) return null;
+
       return await UserModel.findById(context.currentUser.id)
         .populate({
           path: 'photos',
