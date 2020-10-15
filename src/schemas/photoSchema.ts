@@ -47,6 +47,11 @@ export const photoSchema = gql`
     id: ID!
   }
 
+  type TagPhoto {
+    tag: String!
+    photos: [Photo!]!
+  }
+
   type ListPhotos {
     totalCount: Int!
     photos: [Photo!]
@@ -55,6 +60,7 @@ export const photoSchema = gql`
   type Query {
     listPhotos(type: [String], keyword: String, offset: Int, limit: Int): ListPhotos
     getPhoto(id: String!): Photo
+    topTags(tags: Int!, photosPerTag: Int!): [TagPhoto]
   }
 
   type Mutation {

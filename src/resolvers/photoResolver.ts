@@ -8,6 +8,16 @@ import { isError } from '../utils/typeguards';
 import mongoose from 'mongoose';
 import logger from '../utils/logger';
 
+interface TagPhoto {
+  tag: string;
+  photos: Photo[];
+}
+
+interface TopTagsArgs {
+  tags: number;
+  photosPerTag: number;
+}
+
 interface ListPhotos {
   totalCount: number;
   photos: Photo[];
@@ -49,10 +59,7 @@ interface ListPhotosArgs {
 
 export const photoResolver = {
   Query: {
-    listPhotos: async (
-      _root: undefined,
-      args: ListPhotosArgs
-    ): Promise<ListPhotos> => {
+    listPhotos: async (_root: undefined, args: ListPhotosArgs): Promise<ListPhotos> => {
       const type = args.type;
       const keyword = args.keyword;
       const limit = args.limit || 0;
@@ -130,10 +137,7 @@ export const photoResolver = {
       //   .populate('album');
     },
 
-    getPhoto: async (
-      _root: undefined,
-      args: { id: string }
-    ): Promise<Photo | null> => {
+    getPhoto: async (_root: undefined, args: { id: string }): Promise<Photo | null> => {
       const id = args.id;
 
       return await PhotoModel.findOne({
@@ -141,6 +145,43 @@ export const photoResolver = {
       })
         .populate('user')
         .populate('album');
+    },
+
+    topTags: async (_root: undefined, args: TopTagsArgs): Promise<TagPhoto[] | null> => {
+      const tagPhotos = await PhotoModel.find({}, 'tags');
+      const tags = tagPhotos.map((tagPhoto) => tagPhoto.tags).flat();
+
+      interface Acc {
+        [key: string]: number;
+      }
+
+      const TagsWithOccurences = tags.reduce(function (acc: Acc, tag) {
+        acc[tag] = (acc[tag] || 0) + 1;
+        return acc;
+      }, {});
+
+      const sortedTags = Object.keys(TagsWithOccurences).sort(
+        (a: string, b: string) => TagsWithOccurences[b] - TagsWithOccurences[a]
+      );
+
+      const limitedTags = sortedTags.slice(0, args.tags);
+
+      const getPhotos = async (tag: string, limit: number) => {
+        return await PhotoModel.find({ tags: tag }).limit(limit).populate('user');
+      };
+
+      const processArray = async (tags: string[], limit: number) => {
+        const topTagsArray: TagPhoto[] = [];
+
+        for (const tag of tags) {
+          const photos = await getPhotos(tag, limit);
+          topTagsArray.push({ tag, photos });
+        }
+
+        return topTagsArray;
+      };
+
+      return await processArray(limitedTags, args.photosPerTag);
     },
   },
 
@@ -343,9 +384,7 @@ export const photoResolver = {
       const id = args.id;
       if (!id) return null;
 
-      const isOwnPhoto = id.every((value) =>
-        currentUser.photos.includes(value)
-      );
+      const isOwnPhoto = id.every((value) => currentUser.photos.includes(value));
 
       if (!currentUser || (!currentUser.isAdmin && !isOwnPhoto)) {
         throw new AuthenticationError('Not authenticated');
@@ -374,11 +413,7 @@ export const photoResolver = {
         const fields = { ...args };
         delete fields['id'];
 
-        await PhotoModel.updateMany(
-          { _id: { $in: args.id } },
-          { $set: fields },
-          { session }
-        );
+        await PhotoModel.updateMany({ _id: { $in: args.id } }, { $set: fields }, { session });
 
         await session.commitTransaction();
       } catch (error) {
@@ -389,9 +424,7 @@ export const photoResolver = {
         session.endSession();
       }
 
-      const photos = await PhotoModel.find({ _id: { $in: args.id } }).populate(
-        'album'
-      );
+      const photos = await PhotoModel.find({ _id: { $in: args.id } }).populate('album');
       return photos;
     },
 
@@ -404,9 +437,7 @@ export const photoResolver = {
       const id = args.id;
       if (!id) return null;
 
-      const isOwnPhoto = id.every((value) =>
-        currentUser.photos.includes(value)
-      );
+      const isOwnPhoto = id.every((value) => currentUser.photos.includes(value));
 
       if (!currentUser || (!currentUser.isAdmin && !isOwnPhoto)) {
         throw new AuthenticationError('Not authenticated');
