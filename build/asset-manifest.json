@@ -1,17 +1,17 @@
 {
   "files": {
-    "main.js": "/static/js/main.92b40c77.chunk.js",
-    "main.js.map": "/static/js/main.92b40c77.chunk.js.map",
+    "main.js": "/static/js/main.269d0768.chunk.js",
+    "main.js.map": "/static/js/main.269d0768.chunk.js.map",
     "runtime-main.js": "/static/js/runtime-main.21e63127.js",
     "runtime-main.js.map": "/static/js/runtime-main.21e63127.js.map",
     "static/css/2.80e028c5.chunk.css": "/static/css/2.80e028c5.chunk.css",
-    "static/js/2.2159e4cf.chunk.js": "/static/js/2.2159e4cf.chunk.js",
-    "static/js/2.2159e4cf.chunk.js.map": "/static/js/2.2159e4cf.chunk.js.map",
+    "static/js/2.c8410014.chunk.js": "/static/js/2.c8410014.chunk.js",
+    "static/js/2.c8410014.chunk.js.map": "/static/js/2.c8410014.chunk.js.map",
     "index.html": "/index.html",
-    "precache-manifest.7a0c46ffe2d8180f74794b0ef9f0ff85.js": "/precache-manifest.7a0c46ffe2d8180f74794b0ef9f0ff85.js",
+    "precache-manifest.4d839f8cb5e1943f9b6582d6a0148795.js": "/precache-manifest.4d839f8cb5e1943f9b6582d6a0148795.js",
     "service-worker.js": "/service-worker.js",
     "static/css/2.80e028c5.chunk.css.map": "/static/css/2.80e028c5.chunk.css.map",
-    "static/js/2.2159e4cf.chunk.js.LICENSE.txt": "/static/js/2.2159e4cf.chunk.js.LICENSE.txt",
+    "static/js/2.c8410014.chunk.js.LICENSE.txt": "/static/js/2.c8410014.chunk.js.LICENSE.txt",
     "static/media/at-solid.9571ceae.svg": "/static/media/at-solid.9571ceae.svg",
     "static/media/back_01_1920.jpg": "/static/media/back_01_1920.b367cc8a.jpg",
     "static/media/calendar-alt-solid.c0735707.svg": "/static/media/calendar-alt-solid.c0735707.svg",
@@ -26,6 +26,7 @@
     "static/media/code-solid.e8e8f759.svg": "/static/media/code-solid.e8e8f759.svg",
     "static/media/cog-solid.9f07a3df.svg": "/static/media/cog-solid.9f07a3df.svg",
     "static/media/comment-solid.d55715f3.svg": "/static/media/comment-solid.d55715f3.svg",
+    "static/media/consequat.png": "/static/media/consequat.c150eace.png",
     "static/media/consequat_o.cba34d08.svg": "/static/media/consequat_o.cba34d08.svg",
     "static/media/consequat_top2.png": "/static/media/consequat_top2.493eeabb.png",
     "static/media/copyright-solid.43c0952f.svg": "/static/media/copyright-solid.43c0952f.svg",
@@ -67,7 +68,7 @@
   "entrypoints": [
     "static/js/runtime-main.21e63127.js",
     "static/css/2.80e028c5.chunk.css",
-    "static/js/2.2159e4cf.chunk.js",
-    "static/js/main.92b40c77.chunk.js"
+    "static/js/2.c8410014.chunk.js",
+    "static/js/main.269d0768.chunk.js"
   ]
 }
