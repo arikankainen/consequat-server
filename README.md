@@ -1,5 +1,6 @@
-"# consequat-server"
+# Consequat
 
-Heroku:
-https://powerful-woodland-28415.herokuapp.com/
-https://git.heroku.com/powerful-woodland-28415.git
+Tämä repositorio sisältää Consequatin backendin.
+
+Sovelluksen frontend sekä dokumentaatio löytyy GitHub-repositoriosta:
+https://github.com/arikankainen/consequat-client
