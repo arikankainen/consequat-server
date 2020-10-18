@@ -110,6 +110,7 @@ export const photoResolver = {
       const photos = await PhotoModel.find({
         $and: [searchQuery, { hidden: false }],
       })
+        .sort({ dateAdded: 'desc' })
         .skip(offset)
         .limit(limit)
         .populate('user')
@@ -167,7 +168,10 @@ export const photoResolver = {
       const limitedTags = sortedTags.slice(0, args.tags);
 
       const getPhotos = async (tag: string, limit: number) => {
-        return await PhotoModel.find({ tags: tag }).limit(limit).populate('user');
+        return await PhotoModel.find({ tags: tag })
+          .sort({ dateAdded: 'desc' })
+          .limit(limit)
+          .populate('user');
       };
 
       const processArray = async (tags: string[], limit: number) => {
